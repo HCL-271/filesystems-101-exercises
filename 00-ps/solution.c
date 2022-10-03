@@ -19,15 +19,16 @@ struct stat_file {
 
 void ps(void)
 {
-	 DIR *dir;
+    DIR *dir;
     FILE *file_status;
     struct dirent *entry;
     struct stat_file statFile;
 
     dir = opendir(directory_proc);
     if (!dir) {
-        perror("diropen");
-        exit(1);
+	report_error(directory_proc, (int)errno);    
+        //perror("diropen");
+        return;
     };
 
     while ((entry = readdir(dir)) != NULL) {
@@ -37,11 +38,13 @@ void ps(void)
         char tmp_proc[256];
 
         snprintf(tmp_proc, sizeof(tmp_proc), "%s%s%s", directory_proc, entry->d_name, stat);
-
+	
         file_status = fopen(tmp_proc, "r");
         if (file_status == NULL) {
-            perror("file open:");
-            exit(1);
+		report_error(file_status, (int)errno);
+		return;
+            //perror("file open:");
+           // exit(1);
         }
         fscanf(file_status, "%d %s %c", &statFile.pid, statFile.name, &statFile.status);
         fclose(file_status);
