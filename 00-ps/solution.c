@@ -24,8 +24,7 @@ struct stat_file {
 void ps(void)
 {
         DIR* field = opendir(directory_proc);
-        DIR *dir;
-        dir = opendir(directory_proc);
+        
 //      FILE *file_status;
 
 //      struct stat_file statFile;
@@ -58,9 +57,7 @@ void ps(void)
 
                         u_int8_t pid_checker = 1;
 
-                        char tmp_proc[256];
-
-
+                       
 
 
                         //using directory proc field d_name
@@ -238,7 +235,7 @@ void ps(void)
         }
         //close working directory
         closedir(field);
-        closedir(dir);
+     
 //      free(file_status);
 
 }
