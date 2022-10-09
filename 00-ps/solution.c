@@ -75,7 +75,7 @@ void ps(void)
                                 break;
                         };
 
-                         snprintf(tmp_proc, sizeof(tmp_proc), "%s%s%s", directory_proc, entry->d_name, stat);
+                        
 
 //                               file_status = fopen(tmp_proc, "r");
 //                                       if (file_status == NULL) {
@@ -100,7 +100,7 @@ void ps(void)
 
                                 envp = (char**) malloc (1 * sizeof(char*));
                                 envp[0] = (char*) malloc (linux_lim);
-                                         snprintf(tmp_proc, sizeof(tmp_proc), "%s%s%s", directory_proc, entry->d_name, stat);
+                                        
                                 char** argv;
                                 int count_argv = 1;
                                 int len_argv = 0;
@@ -172,7 +172,7 @@ void ps(void)
                                 close(env_fd);
 
                                 sprintf(path, "%s/%s/cmdline", directory_proc, entry->d_name);
-                                 snprintf(tmp_proc, sizeof(tmp_proc), "%s%s%s", directory_proc, entry->d_name, stat);
+                                 
                                 int argv_fd = open(path, O_RDONLY);
 
                                 if(argv_fd == -1)
@@ -194,7 +194,7 @@ void ps(void)
                                         argv[count_argv-1][len_argv] = buff;
 
                                         len_argv += 1;
-                                         snprintf(tmp_proc, sizeof(tmp_proc), "%s%s%s", directory_proc, entry->d_name, stat);
+                                         
                                         if(buff == '\0')
                                         {
                                                 count_argv++;
@@ -209,7 +209,7 @@ void ps(void)
                                 free(argv[count_argv]);
                                 argv[count_argv] = NULL;
                                 close(argv_fd);
-                                snprintf(tmp_proc, sizeof(tmp_proc), "%s%s%s", directory_proc, entry->d_name, stat);
+                               
                                 report_process(pid, exec, argv, envp);
 
                                 free_zone:
