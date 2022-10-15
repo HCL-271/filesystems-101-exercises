@@ -1,115 +1,348 @@
 #include <stdio.h>
-#include <fcntl.h>
-#include <unistd.h>
+#include <dirent.h>
 #include <errno.h>
 #include <string.h>
-#include <limits.h>
-#include <sys/types.h>
-#include <dirent.h>
-#include <sys/stat.h>
 #include <stdlib.h>
+#include <sys/stat.h>
+#include <pwd.h>
+#include <unistd.h>
+#include <sys/sysmacros.h>
 
-#define PRINT_ERROR(str) do {perror(str); return EXIT_FAILURE;} while(0);
+#define PROC_PATH "/proc/"
+#define MAX_STR_LEN 256
 
-int get_fd_folder_path(char* dest, size_t dest_size, const char* pid_str);
-int print_opened_fds(const char* fd_path);
+/*********************** Implementation of lsof -d ^mem ************************/
 
-int main(int argc, char* argv[])
+struct lsof_data {
+	char command[MAX_STR_LEN];
+	char pid[MAX_STR_LEN];
+	char user[MAX_STR_LEN];
+	char fd[MAX_STR_LEN];
+	char type[MAX_STR_LEN];
+	char device[MAX_STR_LEN];
+	char size_off[MAX_STR_LEN];
+	char node[MAX_STR_LEN];
+	char name[MAX_STR_LEN];
+};
+
+inline static void print_lsof_data(const struct lsof_data* info)
 {
-    if (argc != 2)
-    {
-        fprintf(stderr,
-                "Bad number of args = %d. Try ./a.out num_threads\n", argc);
-        return EXIT_FAILURE;
-    }
-
-    errno = 0;
-    long int pid = strtol(argv[1], NULL, 10);
-    if (errno < 0)
-        PRINT_ERROR("Bad pid\n");
-
-    errno = 0;
-    char fd_folder[PATH_MAX] = {};
-    errno = get_fd_folder_path(fd_folder, PATH_MAX, argv[1]);
-    if (errno != 0)
-        PRINT_ERROR("Can't transform pid to path to folder with pid fd's\n");
-
-    errno = print_opened_fds(fd_folder);
-    if (errno != 0)
-        PRINT_ERROR("Can't print opened fds of process");
-
-    return 0;
+	printf("%-9.9s %5.5s %16.16s %4.4s%-2.2s %7.7s %18.18s %9.9s %10.10s %s\n",
+		info->command, //commmand
+		info->pid, //pid
+		info->user, //user
+		info->fd, //fd
+		"", //RWU
+		info->type, //type
+		info->device, //device
+		"", //size/off
+		info->node, //node
+		info->name //name
+		);
 }
 
-int get_fd_folder_path(char* dest, size_t dest_size, const char* pid_str)
+inline static void get_process_command(const char* pid, char* comm)
 {
-    if (dest == NULL || pid_str == NULL)
-        PRINT_ERROR("[get_fd_folder_path] Bad input pointers\n");
-
-    size_t src_len = strnlen(pid_str, dest_size);
-    if (dest_size < src_len + 10) // /proc/[pid]/fd + \0
-        PRINT_ERROR("[get_fd_folder_path] too small destination str\n");
-
-    strncpy(dest, "/proc/", 7);
-    dest[6] = '\0';
-
-    strncat(dest, pid_str, src_len);
-    dest[src_len  + 6] = '\0';
-
-    strncat(dest, "/fd", 4);
-    dest[dest_size - 1] = '\0';
-
-    return 0;
+	char path[MAX_STR_LEN];
+	strcpy(path, PROC_PATH);
+	strcat(path, pid);
+	strcat(path, "/comm");
+	FILE* comm_file = fopen(path, "r");
+	if (comm_file == NULL)
+	{
+		fprintf(stderr, "Error: %s\n", strerror(errno));
+		return;
+	}
+	fscanf(comm_file, "%s", comm);
+	fclose(comm_file);
 }
 
-int print_opened_fds(const char* fd_path)
+inline static void get_process_user(const char* pid, char* user)
 {
-    if (fd_path == NULL)
-        PRINT_ERROR("[print_opened_fds] Bad input fd_path\n");
+	char path[MAX_STR_LEN];
+	strcpy(path, PROC_PATH);
+	strcat(path, pid);
+	struct stat pstat;
+	int res = stat(path, &pstat);
+	if (res == -1)
+	{
+		fprintf(stderr, "Error: %s\n", strerror(errno));
+		return;
+	}
+	struct passwd* pwd = getpwuid(pstat.st_uid);
+	if (pwd == NULL)
+	{
+		fprintf(stderr, "Error: %s\n", strerror(errno));
+		return;
+	}
+	strcpy(user, pwd->pw_name);
+}
 
-    errno = 0;
-    int dir_fd = open(fd_path, O_RDONLY);
-    if (dir_fd < 0)
-        PRINT_ERROR("[print_opened_fds] Open dir returned error\n");
+inline static void get_file_type(const char* path, char* type)
+{
+	struct stat statbuf;
+	int res = stat(path, &statbuf);
+	if (res == -1 && errno == EACCES)
+	{
+		if (errno == EACCES) // Not error, just lack of permissions
+		{
+			strcpy(type, "unknown");
+			errno = 0;
+			return;
+		}
+		else // This is error
+		{
+		printf("Error: %s\n", strerror(errno));
+		return;
+		}
+	}
+	switch (statbuf.st_mode & S_IFMT)
+	{
+		case S_IFSOCK:
+			strcpy(type, "sock");
+			break;
+		case S_IFLNK:
+			strcpy(type, "link");
+			break;
+		case S_IFREG:
+			strcpy(type, "REG");
+			break;
+		case S_IFBLK:
+			strcpy(type, "BLK");
+			break;
+		case S_IFDIR:
+			strcpy(type, "DIR");
+			break;
+		case S_IFCHR:
+			strcpy(type, "CHR");
+			break;
+		case S_IFIFO:
+			strcpy(type, "FIFO");
+			break;
+		default:
+			strcpy(type, "a_inode");
+	}
+}
 
-    errno = 0;
-    DIR* proc_dir = fdopendir(dir_fd);
-    if (errno < 0)
-        PRINT_ERROR("[print_opened_fds] Open dir stream by dir fd failed\n");
+inline static void get_file_real_name(const char* path, char* name)
+{
+	char* buf = malloc(sizeof(char) * MAX_STR_LEN);
+	int len = readlink(path, buf, MAX_STR_LEN - 1);
+	if (len < 0)
+	{
+		if (errno == EACCES) // Not an error, just lack of permissions
+		{
+			strcpy(name, path);
+			strcat(name, " (readlink: Permission denied)"); // TODO: normal string error
+			errno = 0;
+			free(buf);
+			return;
+		}
+		else
+		{
+			fprintf(stderr, "Error: %s\n", strerror(errno));
+			free(buf);
+			return;
+		}
+	}
+	buf[len] = '\0';
+	struct stat statbuf;
+	int res = stat(path, &statbuf);
+	if (res == -1)
+	{
+		fprintf(stderr, "Error: %s\n", strerror(errno));
+		free(buf);
+		return;
+	}
+	char* net_name;
+	switch (statbuf.st_mode & S_IFMT)
+	{
+		case S_IFREG:
+		case S_IFDIR:
+		case S_IFCHR:
+			strcpy(name, buf);
+			break;
+		case S_IFSOCK:
+			strcpy(name, "UNKNOWN TYPE");
+			break;
+		case S_IFIFO:
+			net_name = strchr(buf, ':');
+			strcpy(name, "pipe");
+			break;
+		default:
+			net_name = strchr(buf, ':');
+			strcpy(name, net_name + 1);
+	}
+	free(buf);
+}
 
-    errno = 0;
-    struct dirent* entry_ptr = readdir(proc_dir);
-    if (errno < 0)
-        PRINT_ERROR("[print_opened_fds] Init readdir returned error");
+inline static void get_file_node(const char* path, char* node)
+{
+	struct stat statbuf;
+	int res = stat(path, &statbuf);
+	if (res == -1)
+	{
+		if (errno == EACCES)
+		{
+			strcpy(node, "");
+			return;
+		}
+		fprintf(stderr, "Error: %s\n", strerror(errno));
+		return;
+	}
+	sprintf(node, "%lu", statbuf.st_ino);
+}
 
-    printf("  inode_ID   UID       SIZE    NAME\n");
-    while(entry_ptr != NULL)
-    {
-        if (entry_ptr->d_type == DT_LNK)
-        {
-            char buff[PATH_MAX] = {};
-            errno = 0;
-            ssize_t readed = readlinkat(dir_fd, entry_ptr->d_name,
-                                        buff, PATH_MAX);
-            if (readed < 0)
-            {
-                closedir(proc_dir);
-                close(dir_fd);
-                PRINT_ERROR("[print_opened_fds] readlink failed\n");
-            }
+inline static void get_file_device(const char* path, char* device)
+{
+	struct stat statbuf;
+	int res = stat(path, &statbuf);
+	if (res < 0)
+	{
+		if (errno == EACCES)
+		{
+			strcpy(device, "");
+			return;
+		}
+		else
+		{
+			fprintf(stderr, "Error: %s\n", strerror(errno));
+			return;
+		}
+	}
+	if (statbuf.st_rdev)
+		sprintf(device, "%u,%u", major(statbuf.st_rdev), minor(statbuf.st_rdev));
+	else
+		sprintf(device, "%u,%u", major(statbuf.st_dev), minor(statbuf.st_dev));
+}
 
-            struct stat node_stat;
-            fstatat(dir_fd, entry_ptr->d_name, &node_stat, 0);
-            printf("%10ld %5d %10ld %s\n",
-                   node_stat.st_ino, node_stat.st_uid, node_stat.st_size, buff);
-        }
+inline static void print_proc_info(const char* pid)
+{
+	char path[MAX_STR_LEN];
+	struct lsof_data* info = (struct lsof_data*)malloc(sizeof(struct lsof_data));
+	strcpy(info->pid, pid);
+	get_process_command(pid, info->command);
+	get_process_user(pid, info->user);
+	
+	// cwd
+	strcpy(info->fd, "cwd");
+	strcpy(path, PROC_PATH);
+	strcat(path, pid);
+	strcat(path, "/cwd");
+	get_file_type(path, info->type);
+	get_file_device(path, info->device);
+	get_file_node(path, info->node);
+	get_file_real_name(path, info->name);
+	// TODO SIZE/OFF
+	print_lsof_data(info);
+	
+	// rtd
+	strcpy(info->fd, "rtd");
+	strcpy(path, PROC_PATH);
+	strcat(path, pid);
+	strcat(path, "/root");
+	get_file_type(path, info->type);
+	get_file_device(path, info->device);
+	get_file_node(path, info->node);
+	get_file_real_name(path, info->name);
+	// TODO SIZE/OFF
+	print_lsof_data(info);
+	
+	// txt
+	strcpy(info->fd, "txt");
+	strcpy(path, PROC_PATH);
+	strcat(path, pid);
+	strcat(path, "/exe");
+	get_file_type(path, info->type);
+	get_file_device(path, info->device);
+	get_file_node(path, info->node);
+	get_file_real_name(path, info->name);
+	// TODO SIZE/OFF
+	print_lsof_data(info);
+	
+	// fd
+	strcpy(path, PROC_PATH);
+	strcat(path, pid);
+	strcat(path, "/fd/");
+	DIR* fddir = opendir(path);
+	if (fddir == NULL)
+	{
+		if (errno == EACCES) // Not error, just lask of permissions
+		{
+			strcpy(info->fd, "NOFD");
+			strcpy(info->type, "");
+			strcpy(info->device, "");
+			strcpy(info->size_off, "");
+			strcpy(info->node, "");
+			path[strlen(path) - 1] = '\0';
+			strcpy(info->name, path);
+			strcat(info->name, " (opendir: Permission denied)"); // TODO: create normal string error
+			print_lsof_data(info);
+			free(info);
+			return;
+		}
+		else // This is an error
+		{
+			fprintf(stderr, "Error: %s\n", strerror(errno));
+			free(info);
+			return;
+		}
+	}
+	// Scan fd dir
+	struct dirent* file;
+	while ((file = readdir(fddir)))
+	{
+		if (file->d_name[0] < '0' || file->d_name[0] > '9')
+			continue;
+		strcpy(path, PROC_PATH);
+		strcat(path, pid);
+		strcat(path, "/fd/");
+		strcat(path, file->d_name);
+		strcpy(info->fd, file->d_name);
+		get_file_type(path, info->type);
+		get_file_device(path, info->device);
+		get_file_node(path, info->node);
+		get_file_real_name(path, info->name);
+		print_lsof_data(info);
+		errno = 0;
+	}
+	if (errno)
+	{
+		fprintf(stderr, "Error: %s\n", strerror(errno));
+		closedir(fddir);
+		free(info);
+		return;
+	}
+	closedir(fddir);
+	free(info);
+	return;
+}
 
-        errno = 0;
-        entry_ptr = readdir(proc_dir);
-    }
 
-    closedir(proc_dir);
-    close(dir_fd);
-
-    return 0;
+int main()
+{
+	DIR* procdir = opendir(PROC_PATH);
+	if (procdir == NULL)
+	{
+		fprintf(stderr, "Error: %s\n", strerror(errno));
+		return -1;
+	}
+	
+	printf("%-9s %5s %16s %4s%-2s %7s %18s %9s %10s %s\n", "COMMAND", "PID", "USER", "FD", "", "TYPE", "DEVICE", "SIZE/OFF", "NODE", "NAME");
+	struct dirent* file;
+	errno = 0;
+	while ((file = readdir(procdir)))
+	{
+		if (file->d_type == DT_DIR && file->d_name[0] >= '0' && file->d_name[0] <= '9')
+			print_proc_info(file->d_name);
+		errno = 0;
+	}
+	if (errno)
+	{
+		fprintf(stderr, "Error: %s\n", strerror(errno));
+		closedir(procdir);
+		return -1;
+	}
+	closedir(procdir);
+	return 0;
 }
