@@ -1,4 +1,4 @@
-#include <solution.h>
+#include "solution.h"
 
 int main(int argc, char **argv)
 {
