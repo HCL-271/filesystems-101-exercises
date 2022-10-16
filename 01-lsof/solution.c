@@ -1,4 +1,4 @@
-#include <solution.h>
+#include "solution.h"	
 #include <sys/types.h>
 #include <dirent.h>
 #include <stdio.h>
@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <linux/limits.h>
-
+#include <stdbool.h>
 
 /*
 #define PROC_PATH "/proc/"
@@ -115,7 +115,7 @@ void lsof(void)
 	
     	while(bool_checker){
 		errno = 0;
-		entry = readdir(proc);
+		entry = readdir(directory_proc);
 		if (entry == NULL && errno != 0)
 		{
 			report_error(procdir , errno);
@@ -151,8 +151,8 @@ void lsof(void)
 		char path_to_file[PATH_MAX * 2];
 		int auth_sum = 0;
 		
-		sprintf(direct_way, "%s/%s/fd", procdir , dp->d_name);
-		struct dirent* fd_dir;
+		sprintf(direct_way, "%s/%s/fd", procdir , entry->d_name);
+		struct dirent* federal_dir;
 		DIR* federal = opendir(direct_way);
 		
 		auth_sum += auth_sum;
