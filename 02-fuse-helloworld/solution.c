@@ -1,3 +1,4 @@
+#include "solution.h"
 #include <stdio.h>
 #include <dirent.h>
 #include <errno.h>
@@ -6,6 +7,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
+
 
 void report_error (const char* msg, char* path) {
     char* message = calloc(strlen(path) + strlen(msg) + 1, 1);
