@@ -104,7 +104,7 @@ int check_dir(int dirfd, char** full_path, int* buff_len, int path_len) {
     }
 }
 
-void helloworld(char **argv) {
+int helloworld(char **argv) {
     
     char* full_path = calloc(strlen(argv[1]) + 1, 1);
     strcpy(full_path, argv[1]);
@@ -114,12 +114,12 @@ void helloworld(char **argv) {
     if (newdirfd == -1) {
         report_error("failed to open directory ", full_path);
         free(full_path);
-        return ;
+        return -1;
     }
     int res = check_dir(newdirfd, &full_path, &buff_len, strlen(argv[1]));
     free(full_path);
     if (res == -1) {
-        return ;
+        return -1;
     }
-    return ;
+    return 0;
 }
