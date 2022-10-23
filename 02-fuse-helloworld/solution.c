@@ -42,11 +42,78 @@ static int readdir_hello(const char *path, void *buffer, fuse_fill_dir_t fuse_fi
 	return 0;
 }
 
+static int hello_read(const char *path, char *buf, size_t size, off_t offsett, struct fuse_file_info *fuse_file_info1)
+{
+	if (strcmp(path+1, path1) != 0)
+	{
+		return -ENOENT;
+	}
+	
+	struct fuse_context* fuse_context1 = fuse_get_context();
+	pid_t is_pid = fuse_context1->pid;
+	
+        size_t width = snprintf(NULL, 0, "hello, %d\n", is_pid);
+        (void) fuse_file_info1;
+	
+	char* file = (char*) malloc (width);
+	sprintf(file, "hello, %d\n", is_pid);
+	
+        if (((offsett < (long int)width) && (offsett + size > width))
+	    {
+             
+                memcpy(buf, content + offsett, len - offsett);
+        } else
+	    {
+                free(content);
+        	return 0;
+	    }
 
+	free(content);
+        return (len - offsett);
+}
+static int getattr_hello(const char *path, struct stat *stat,
+                           struct fuse_file_info *fuse_file_info1) {
+  (void)fuse_file_info1;
+	
+  memset(stat, 0, sizeof(struct stat));
+  if (strcmp(path1, "/") == 0)
+  {
+    stat->st_mode = S_IFDIR | S_IRUSR;
+    stat->st_nlink = 2;
+	return 0;
+	  
+  } else if (strcmp(path1, fs_path) == 0) 
+  {
+    stat->st_mode = S_IFREG | S_IRUSR;
+    stat->st_nlink = 1;
+    stat->st_size = 496;
+	return 0;
+  }
+
+  return -ENOENT;
+}
+
+static int open_hello(const char *path, struct fuse_file_info *fuse_file_info1) {
+  if (strcmp(path1, fs_path) != 0)
+  {
+	  return -ENOENT;
+  }
+	
+  if ((fuse_file_info1->flags & O_ACCMODE) != O_RDONLY) 
+  {
+	  return -EROFS;
+  }
+  return 0;
+}	    
+	    
 static const struct fuse_operations hellofs_ops = {
 	.init = init_hello,
 	.create = create_hello,
-   	.readdir = readdir_hello
+   	.readdir = readdir_hello,
+	.read = read_hello,
+	.getattr = getattr_hello,
+    	.open = open_hello
+    
 };
 
 int helloworld(const char *mntp)
