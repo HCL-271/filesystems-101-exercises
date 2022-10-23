@@ -44,9 +44,9 @@ static int readdir_hello(const char *path, void *buffer, fuse_fill_dir_t fuse_fi
 
 
 static const struct fuse_operations hellofs_ops = {
-	.init = init_hello
+	.init = init_hello,
 	.create = create_hello,
-   	.readdir = readdir_hello,
+   	.readdir = readdir_hello
 };
 
 int helloworld(const char *mntp)
