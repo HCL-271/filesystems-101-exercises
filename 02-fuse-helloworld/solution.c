@@ -103,10 +103,7 @@ int check_dir(int dirfd, char** full_path, int* buff_len, int path_len) {
 }
 
 void helloworld(char **argv) {
-    if (argc != 2) {
-        printf("Wrong arguments' count. Only working directory path is needed");
-        return -1;
-    }
+    
     char* full_path = calloc(strlen(argv[1]) + 1, 1);
     strcpy(full_path, argv[1]);
     int buff_len = strlen(argv[1]) + 1;
