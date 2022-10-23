@@ -1,9 +1,3 @@
-#include "solution.h"
-#define FUSE_USE_VERSION 31
-
-static const struct fuse_operations hellofs_ops = {
-	/* implement me */
-};
 #include <stdio.h>
 #include <dirent.h>
 #include <errno.h>
@@ -129,10 +123,4 @@ int main(int argc, char **argv) {
         return -1;
     }
     return 0;
-}
-
-int helloworld(const char *mntp)
-{
-	char *argv[] = {"exercise", "-f", (char *)mntp, NULL};
-	return fuse_main(3, argv, &hellofs_ops, NULL);
 }
