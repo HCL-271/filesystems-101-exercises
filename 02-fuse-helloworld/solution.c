@@ -76,7 +76,7 @@ static int getattr_hello(const char *path, struct stat *stat,
   (void)fuse_file_info1;
 	
   memset(stat, 0, sizeof(struct stat));
-  if (strcmp(path1, "/") == 0)
+  if (strcmp(path, "/") == 0)
   {
     stat->st_mode = S_IFDIR | S_IRUSR;
     stat->st_nlink = 2;
@@ -86,7 +86,7 @@ static int getattr_hello(const char *path, struct stat *stat,
   {
     stat->st_mode = S_IFREG | S_IRUSR;
     stat->st_nlink = 1;
-    stat->st_size = 496;
+    stat->st_size = 512;
 	return 0;
   }
 
