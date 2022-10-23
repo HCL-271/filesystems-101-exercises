@@ -25,7 +25,7 @@ static int create_hello(const char* path, mode_t mode, struct fuse_file_info* fu
 
 }
 
-static int readdir_hello(const char *path, void *buffer, fuse_fill_dir_t useless_variable_here, off_t offsett, struct fuse_file_info *fuse_file_info, enum fuse_readdir_flags fuse_readdir_flags1)
+static int readdir_hello(const char *path, void *buffer, fuse_fill_dir_t fuse_fill_dir_t1, off_t offsett, struct fuse_file_info *fuse_file_info, enum fuse_readdir_flags fuse_readdir_flags1)
 {
 	(void)offsett;
 	(void)fuse_file_info;
@@ -36,9 +36,9 @@ static int readdir_hello(const char *path, void *buffer, fuse_fill_dir_t useless
 		return -ENOENT;
 	}
 	
-	fill(buffer, ".", NULL, 0, 0);
-	fill(buffer, "..", NULL, 0, 0);
-	fill(buffer, path1, NULL, 0, 0);
+	fuse_fill_dir_t1(buffer, ".", NULL, 0, 0);
+	fuse_fill_dir_t1(buffer, "..", NULL, 0, 0);
+	fuse_fill_dir_t1(buffer, path1, NULL, 0, 0);
 	return 0;
 }
 
