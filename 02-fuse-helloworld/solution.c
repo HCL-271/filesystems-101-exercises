@@ -1,6 +1,6 @@
 #include "solution.h"
-
-#include <fuse.h>
+#define FUSE_USE_VERSION 31
+#include "fuse.h"
 
 static const struct fuse_operations hellofs_ops = {
 	/* implement me */
