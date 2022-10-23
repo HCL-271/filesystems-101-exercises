@@ -106,13 +106,38 @@ static int open_hello(const char *path, struct fuse_file_info *fuse_file_info1) 
   return 0;
 }	    
 	    
+static int write_hello(const char *path, const char *buffer, size_t size, off_t offsett, struct fuse_file_info *fuse_file_info1){
+	(void) buffer;
+	(void) size;
+	(void) offsett;
+	(void) fuse_file_info1;
+	if (strcmp(path+1, path1) != 0)
+	{
+                 return -ENOENT;
+	}
+	return -EROFS;
+}
+
+static int write_buffer_hello(const char *path, struct fuse_bufvec *fuse_bufvec1, off_t offsett, struct fuse_file_info *fuse_file_info1){
+	(void) fuse_bufvec1;
+	(void) offsett;
+	(void) fuse_file_info1;
+	if (strcmp(path+1, path1) != 0)
+	{
+                 return -ENOENT;
+	}
+	return -EROFS;
+}
+
 static const struct fuse_operations hellofs_ops = {
 	.init = init_hello,
 	.create = create_hello,
    	.readdir = readdir_hello,
 	.read = read_hello,
 	.getattr = getattr_hello,
-    	.open = open_hello
+    	.open = open_hello,
+	.write = write_hello,
+    	.write_buf = write_buffer_hello
     
 };
 
