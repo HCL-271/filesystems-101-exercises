@@ -42,7 +42,7 @@ static int readdir_hello(const char *path, void *buffer, fuse_fill_dir_t fuse_fi
 	return 0;
 }
 
-static int hello_read(const char *path, char *bufer, size_t size, off_t offsett, struct fuse_file_info *fuse_file_info1)
+static int read_hello(const char *path, char *bufer, size_t size, off_t offsett, struct fuse_file_info *fuse_file_info1)
 {
 	if (strcmp(path+1, path1) != 0)
 	{
@@ -94,7 +94,7 @@ static int getattr_hello(const char *path, struct stat *stat,
 }
 
 static int open_hello(const char *path, struct fuse_file_info *fuse_file_info1) {
-  if (strcmp(path1, fs_path) != 0)
+  if (strcmp(path+1, path1) != 0)
   {
 	  return -ENOENT;
   }
