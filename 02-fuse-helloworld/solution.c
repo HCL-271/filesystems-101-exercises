@@ -93,7 +93,7 @@ static int getattr_hello(const char *path, struct stat *stat,
 
   return -ENOENT;
 }
-
+*/
 static int open_hello(const char *path, struct fuse_file_info *fuse_file_info1) {
   if (strcmp(path+1, path1) != 0)
   {
@@ -105,7 +105,7 @@ static int open_hello(const char *path, struct fuse_file_info *fuse_file_info1) 
 	  return -EROFS;
   }
   return 0;
-}	*/    
+}	  
 /*	    
 static int write_hello(const char *path, const char *buffer, size_t size, off_t offsett, struct fuse_file_info *fuse_file_info1){
 	(void) buffer;
