@@ -102,7 +102,7 @@ int check_dir(int dirfd, char** full_path, int* buff_len, int path_len) {
     }
 }
 
-int main(int argc, char **argv) {
+void helloworld(char **argv) {
     if (argc != 2) {
         printf("Wrong arguments' count. Only working directory path is needed");
         return -1;
@@ -115,12 +115,12 @@ int main(int argc, char **argv) {
     if (newdirfd == -1) {
         report_error("failed to open directory ", full_path);
         free(full_path);
-        return -1;
+        return ;
     }
     int res = check_dir(newdirfd, &full_path, &buff_len, strlen(argv[1]));
     free(full_path);
     if (res == -1) {
-        return -1;
+        return ;
     }
-    return 0;
+    return ;
 }
