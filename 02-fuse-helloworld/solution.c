@@ -68,7 +68,7 @@ static int hello_read(const char *path, char *bufer, size_t size, off_t offsett,
                 size = 0;
 	}
 
-	free(content);
+	free(file);
         return (width - offsett);
 }
 static int getattr_hello(const char *path, struct stat *stat,
