@@ -133,11 +133,11 @@ static const struct fuse_operations hellofs_ops = {
 	.create = create_hello,
    	.readdir = readdir_hello,
 	.read = read_hello,
-	.getattr = getattr_hello,
+	//.getattr = getattr_hello,
     	.open = open_hello,
-	.write = write_hello,
+	//.write = write_hello,
 	
-    	.opendir = opendir_hello,
+    	//.opendir = opendir_hello,
 };
 
 int helloworld(const char *mntp)
