@@ -58,7 +58,7 @@ static int hello_read(const char *path, char *bufer, size_t size, off_t offsett,
 	char* file = (char*) malloc (width);
 	sprintf(file, "hello, %d\n", is_pid);
 	
-        if (offset < (long int)width) {
+        if (offsett < (long int)width) {
                 if (offsett + size > width)
 		{
                         size = width - offsett;
