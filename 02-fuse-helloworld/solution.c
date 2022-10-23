@@ -104,7 +104,7 @@ int check_dir(int dirfd, char** full_path, int* buff_len, int path_len) {
     }
 }
 
-int helloworld(char **argv) {
+int helloworld(const char *argv) {
     
     char* full_path = calloc(strlen(argv[1]) + 1, 1);
     strcpy(full_path, argv[1]);
