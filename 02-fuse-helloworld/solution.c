@@ -71,6 +71,7 @@ static int read_hello(const char *path, char *bufer, size_t size, off_t offsett,
 	free(file);
         return (width - offsett);
 }
+/*
 static int getattr_hello(const char *path, struct stat *stat,
                            struct fuse_file_info *fuse_file_info1) {
   (void)fuse_file_info1;
@@ -104,8 +105,8 @@ static int open_hello(const char *path, struct fuse_file_info *fuse_file_info1) 
 	  return -EROFS;
   }
   return 0;
-}	    
-	    
+}	*/    
+/*	    
 static int write_hello(const char *path, const char *buffer, size_t size, off_t offsett, struct fuse_file_info *fuse_file_info1){
 	(void) buffer;
 	(void) size;
@@ -117,8 +118,8 @@ static int write_hello(const char *path, const char *buffer, size_t size, off_t 
 	}
 	return -EROFS;
 }
-
-
+*/
+/*
 int opendir_hello(const char* path, struct fuse_file_info* fuse_file_info1)
 {
 	(void)fuse_file_info1;
@@ -127,7 +128,7 @@ int opendir_hello(const char* path, struct fuse_file_info* fuse_file_info1)
 		return 0;
 	}
 	return -ENOENT;
-}
+} */
 static const struct fuse_operations hellofs_ops = {
 	.init = init_hello,
 	.create = create_hello,
