@@ -82,7 +82,7 @@ static int getattr_hello(const char *path, struct stat *stat,
     stat->st_nlink = 2;
 	return 0;
 	  
-  } else if (strcmp(path1, fs_path) == 0) 
+  } else if (strcmp(path+1, path1) == 0) 
   {
     stat->st_mode = S_IFREG | S_IRUSR;
     stat->st_nlink = 1;
