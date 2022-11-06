@@ -42,7 +42,7 @@ int dump_file(int img, int inode_nr, int out)
 	int l1 = lenght/4;
 	if(pread(img, (char*)&trans_check, sizeof(struct ext2_super_block), SUPERBLOCK_OFFSET) != sizeof(struct ext2_super_block))
 		return -errno;
-	int i = 0;
+
 	//long int block_size = 1024 << trans_check.s_log_block_size;	
 	
 	int un_adress = ((esb.s_first_data_block+1)*lenght + sizeof(struct ext2_group_desc)*((inode_nr-1) / esb.s_inodes_per_group));
@@ -119,7 +119,7 @@ int dump_file(int img, int inode_nr, int out)
 	/*
 	upper_bound = lenght/4;
 	blocks = var1;
-	
+	int i = 0;
 	char buf1[(lenght/4)];
 	while ( i < upper_bound) {
 		int size = currfs > l1 ? l1 : currfs;
