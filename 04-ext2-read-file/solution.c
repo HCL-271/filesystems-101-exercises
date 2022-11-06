@@ -105,11 +105,6 @@ int dump_file(int img, int inode_nr, int out)
 		if(pread(img, buf1, size,l1*blocks[i]) != size){
 			return -errno;
 		}
-		i++;
-		
-	}
-	i = 0;
-	while ( i < upper_bound) {
 		int size = currfs > l1 ?l1 : currfs;
 		if(write(out, buf, size) != size){
 			return -errno;
@@ -117,10 +112,14 @@ int dump_file(int img, int inode_nr, int out)
 		currfs -= l1;
 		if (currfs <= 0){
 			res =  0;
+			break;
+			
 		}
-		i++;
+		else{
+		res = 1;
+		}
+			i++;
 	}
-	res =  1;
 	
 	if(res <= 0)
 	{
@@ -158,11 +157,8 @@ int dump_file(int img, int inode_nr, int out)
 		if(pread(img, buf2, size, l1*blocks[i]) != size){
 			return -errno;
 		}
-		i++;
-		
-	}
-	i = 0;
-	while ( i < upper_bound) {
+
+
 		int size = currfs > lenght/4 ? lenght/4 : currfs;
 		if(write(out, buf, size) != size){
 			return -errno;
@@ -170,11 +166,15 @@ int dump_file(int img, int inode_nr, int out)
 		currfs -= l1;
 		if (currfs <= 0){
 			res =  0;
+			break;
+		}else
+		{
+			res = 1;
 		}
 		i++;
 	}
 	
-	res =  1;
+
 		
 		if(res <= 0)
 		{
