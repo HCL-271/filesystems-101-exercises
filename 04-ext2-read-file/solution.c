@@ -16,7 +16,7 @@ int dump_file(int img, int inode_nr, int out)
 	struct ext2_super_block esb = {};
 	
 	struct ext2_super_block trans_check = {};
-	
+	long int lenght = 1024 << super_block.s_log_block_size;
 	if(pread(img, (char*)&esb, sizeof(struct ext2_super_block), SUPERBLOCK_OFFSET) != sizeof(struct ext2_super_block))
 		return -errno;
 	
@@ -25,7 +25,7 @@ int dump_file(int img, int inode_nr, int out)
 	int i = 0;
 	//long int block_size = 1024 << trans_check.s_log_block_size;	
 	
-	int un_adress = ((esb.s_first_data_block+1)*(1024 << trans_check.s_log_block_size) + sizeof(struct ext2_group_desc)*((inode_nr-1) / esb.s_inodes_per_group));
+	int un_adress = ((esb.s_first_data_block+1)*lenght + sizeof(struct ext2_group_desc)*((inode_nr-1) / esb.s_inodes_per_group));
 	int freer = 0;
 	struct ext2_group_desc gb = {};
 	
@@ -33,28 +33,28 @@ int dump_file(int img, int inode_nr, int out)
 		return -errno;
 
 	struct ext2_inode ext2_inode1 = {};
-	if(pread(img, (char*)&ext2_inode1, sizeof(struct ext2_inode), gb.bg_inode_table*(1024 << trans_check.s_log_block_size) + ((inode_nr-1) % esb.s_inodes_per_group)*esb.s_inode_size) != sizeof(struct ext2_inode))
+	if(pread(img, (char*)&ext2_inode1, sizeof(struct ext2_inode), gb.bg_inode_table*lenght + ((inode_nr-1) % esb.s_inodes_per_group)*esb.s_inode_size) != sizeof(struct ext2_inode))
 		return -errno;
 
 	long long currfs = ((long long)ext2_inode1.i_size_high << 32L) + (long long)ext2_inode1.i_size;
 	long long siz_chck = ((long long)ext2_inode1.i_size_high << 32L) + (long long)ext2_inode1.i_size;
 
-	uint32_t* var1 = (uint32_t*)malloc((1024 << trans_check.s_log_block_size));
-	uint32_t* var2 = (uint32_t*)malloc((1024 << trans_check.s_log_block_size));
+	uint32_t* var1 = (uint32_t*)malloc(lenght);
+	uint32_t* var2 = (uint32_t*)malloc(lenght);
 	int res = -1;
 	
 	int upper_bound = EXT2_IND_BLOCK;
 	uint32_t* blocks = ext2_inode1.i_block;
-	char buf[(1024 << trans_check.s_log_block_size)];
+	char buf[lenght];
 	for (int i = 0; i < upper_bound; i++) {
-		int size = currfs > (1024 << trans_check.s_log_block_size) ? (1024 << trans_check.s_log_block_size) : currfs;
-		if(pread(img, buf, size, (1024 << trans_check.s_log_block_size)*blocks[i]) != size){
+		int size = currfs > lenght ? lenght : currfs;
+		if(pread(img, buf, size, lenght*blocks[i]) != size){
 			return -errno;
 		}
 		if(write(out, buf, size) != size){
 			return -errno;
 		}
-		currfs -= (1024 << trans_check.s_log_block_size);
+		currfs -=lenght;
 		if (currfs <= 0){
 			res =  0;
 		}
@@ -71,8 +71,8 @@ int dump_file(int img, int inode_nr, int out)
 		return res;
 	}
 
-
-	if(pread(img, (char*)var1, (1024 << trans_check.s_log_block_size), (1024 << trans_check.s_log_block_size) * ext2_inode1.i_block[EXT2_IND_BLOCK]) != (1024 << trans_check.s_log_block_size)){
+	siz_chk += 1;
+	if(pread(img, (char*)var1, lenght, lenght * ext2_inode1.i_block[EXT2_IND_BLOCK]) != lenght){
 		res = -errno;
 			
 		{
@@ -83,13 +83,13 @@ int dump_file(int img, int inode_nr, int out)
 	}
 	
 	
-	upper_bound = (1024 << trans_check.s_log_block_size)/4;
+	upper_bound = lenght/4;
 	blocks = var1;
 	
-	buf[(1024 << trans_check.s_log_block_size)/4];
+	buf[lenght/4];
 	while ( i < upper_bound) {
-		int size = currfs > (1024 << trans_check.s_log_block_size)/4 ? (1024 << trans_check.s_log_block_size)/4 : currfs;
-		if(pread(img, buf, size, (1024 << trans_check.s_log_block_size)/4*blocks[i]) != size){
+		int size = currfs > lenght/4 ? lenght/4 : currfs;
+		if(pread(img, buf, size,lenght/4*blocks[i]) != size){
 			return -errno;
 		}
 		i++;
@@ -97,11 +97,11 @@ int dump_file(int img, int inode_nr, int out)
 	}
 	i = 0;
 	while ( i < upper_bound) {
-		int size = currfs > (1024 << trans_check.s_log_block_size)/4 ? (1024 << trans_check.s_log_block_size)/4 : currfs;
+		int size = currfs > lenght/4 ?lenght/4 : currfs;
 		if(write(out, buf, size) != size){
 			return -errno;
 		}
-		currfs -= (1024 << trans_check.s_log_block_size)/4;
+		currfs -= lenght/4;
 		if (currfs <= 0){
 			res =  0;
 		}
@@ -118,28 +118,28 @@ int dump_file(int img, int inode_nr, int out)
 
 
 
-	if(pread(img, (char*)var2, (1024 << trans_check.s_log_block_size), (1024 << trans_check.s_log_block_size) * ext2_inode1.i_block[EXT2_IND_BLOCK+1]) != (1024 << trans_check.s_log_block_size)){
+	if(pread(img, (char*)var2, lenght, lenght * ext2_inode1.i_block[EXT2_IND_BLOCK+1]) !=lenght){
 		res = -errno;
 		freer = make_free(var1,var2);
 		return res;
 	}
 
-	for (int j = 0; j < (1024 << trans_check.s_log_block_size)/4; ++j)
+	for (int j = 0; j <lenght/4; ++j)
 	{
-		if(pread(img, (char*)var1, (1024 << trans_check.s_log_block_size), (1024 << trans_check.s_log_block_size) * var2[j]) != (1024 << trans_check.s_log_block_size)){
+		if(pread(img, (char*)var1, lenght,lenght * var2[j]) != lenght){
 			res = -errno;
 			freer = make_free(var1,var2);
 			return res;
 		}
 			
-		upper_bound = (1024 << trans_check.s_log_block_size)/4;
+		upper_bound = lenght)/4;
 	blocks = var1;
 	
-	buf[(1024 << trans_check.s_log_block_size)/4];
+	buf[lenght/4];
 	i = 0;
 	while ( i < upper_bound) {
-		int size = currfs > (1024 << trans_check.s_log_block_size)/4 ? (1024 << trans_check.s_log_block_size)/4 : currfs;
-		if(pread(img, buf, size, (1024 << trans_check.s_log_block_size)/4*blocks[i]) != size){
+		int size = currfs >lenght/4 ? lenght/4 : currfs;
+		if(pread(img, buf, size, lenght/4*blocks[i]) != size){
 			return -errno;
 		}
 		i++;
@@ -147,11 +147,11 @@ int dump_file(int img, int inode_nr, int out)
 	}
 	i = 0;
 	while ( i < upper_bound) {
-		int size = currfs > (1024 << trans_check.s_log_block_size)/4 ? (1024 << trans_check.s_log_block_size)/4 : currfs;
+		int size = currfs > lenght/4 ? lenght/4 : currfs;
 		if(write(out, buf, size) != size){
 			return -errno;
 		}
-		currfs -= (1024 << trans_check.s_log_block_size)/4;
+		currfs -= lenght/4;
 		if (currfs <= 0){
 			res =  0;
 		}
