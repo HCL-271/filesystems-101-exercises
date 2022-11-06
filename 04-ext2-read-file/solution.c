@@ -12,6 +12,25 @@ int make_free(uint32_t* a,uint32_t* b)
 	return 0;
 }
 
+int bt(int img, int out, long int lenght, long long int* currfs, int upper_bound, uint32_t* array){
+
+	char buf[lenght];
+	for (int i = 0; i < upper_bound; i++) {
+		int size = *currfs > lenght ? block_size : *currfs;
+		if(pread(img, buf, size, lenght*array[i]) != size){
+			return -errno;
+		}
+		if(write(out, buf, size) != size){
+			return -errno;
+		}
+		*currfs -= lenght;
+		if (*currfs <= 0){
+			return 0;
+		}
+	}
+	
+	return 1;
+}
 int dump_file(int img, int inode_nr, int out)
 {
 	struct ext2_super_block esb = {};
@@ -47,10 +66,12 @@ int dump_file(int img, int inode_nr, int out)
 	
 	
 
+	//int img1 = img;
+	//int inode_nr1 = inode_nr;
+	//int out1 = out
 	
 	
-	
-	
+	/*
 	int upper_bound = EXT2_IND_BLOCK;
 	uint32_t* blocks = ext2_inode1.i_block;
 	char buf[lenght];
@@ -72,9 +93,9 @@ int dump_file(int img, int inode_nr, int out)
 			res =  1;
 		}
 	}
+	*/
 	
-	
-	
+	int res = block_transfer(img, out, lenght, &currfs, EXT2_IND_BLOCK, ext2_inode1);
 	
 	
 	if(res <= 0)
@@ -95,7 +116,7 @@ int dump_file(int img, int inode_nr, int out)
 		}
 	}
 	
-	
+	/*
 	upper_bound = lenght/4;
 	blocks = var1;
 	int l1 = lenght/4;
@@ -119,7 +140,8 @@ int dump_file(int img, int inode_nr, int out)
 		}
 			i++;
 	}
-	
+	*/
+	res = block_transfer(img, out, lenght, &currfs, lenght/4, var1);
 	if(res <= 0)
 	{
 		
@@ -145,7 +167,7 @@ int dump_file(int img, int inode_nr, int out)
 			free(var2);
 			return res;
 		}
-			
+	/*		
 		upper_bound = l1;
 	blocks = var1;
 	
@@ -171,7 +193,8 @@ int dump_file(int img, int inode_nr, int out)
 		}
 		i++;
 	}
-	
+	*/
+	res = block_transfer(img, out, lenght, &currfs, lenght/4, var1);
 
 		
 		if(res <= 0)
@@ -181,6 +204,7 @@ int dump_file(int img, int inode_nr, int out)
 		return res;
 		}
 	}
+	
 	freer += 1;
 	if (freer < 0){
 		return errno;
