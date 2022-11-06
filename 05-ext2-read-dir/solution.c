@@ -19,7 +19,7 @@ int make_free(uint32_t* a,uint32_t* b)
 	
 
 
-int dump_file(int img, int inode_nr)
+int dump_dir(int img, int inode_nr)
 {
 	struct ext2_super_block esb = {};
 	
