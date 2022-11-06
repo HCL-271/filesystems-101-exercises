@@ -44,7 +44,7 @@ int dump_file(int img, int inode_nr, int out)
 	if(pread(img, (char*)&ext2_inode1, sizeof(struct ext2_inode), gb.bg_inode_table*lenght + ((inode_nr-1) % esb.s_inodes_per_group)*esb.s_inode_size) != sizeof(struct ext2_inode))
 		return -errno;
 
-	long long currfs = ((long long)ext2_inode1.i_size_high << 32L) + (long long)ext2_inode1.i_size;
+	
 	long long siz_chck = ((long long)ext2_inode1.i_size_high << 32L) + (long long)ext2_inode1.i_size;
 
 	uint32_t* var1 = (uint32_t*)malloc(lenght);
