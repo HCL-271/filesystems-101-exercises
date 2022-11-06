@@ -139,7 +139,7 @@ int dump_file(int img, int inode_nr, int out)
 	i = 0;
 	while ( i < upper_bound) {
 		int size = currfs >l1 ? l1 : currfs;
-		if(pread(img, buf2, size, l14*blocks[i]) != size){
+		if(pread(img, buf2, size, l1*blocks[i]) != size){
 			return -errno;
 		}
 		i++;
