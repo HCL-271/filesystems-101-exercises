@@ -105,7 +105,6 @@ int dump_file(int img, int inode_nr, int out)
 		if(pread(img, buf1, size,l1*blocks[i]) != size){
 			return -errno;
 		}
-		int size = currfs > l1 ?l1 : currfs;
 		if(write(out, buf, size) != size){
 			return -errno;
 		}
@@ -159,7 +158,6 @@ int dump_file(int img, int inode_nr, int out)
 		}
 
 
-		int size = currfs > lenght/4 ? lenght/4 : currfs;
 		if(write(out, buf, size) != size){
 			return -errno;
 		}
