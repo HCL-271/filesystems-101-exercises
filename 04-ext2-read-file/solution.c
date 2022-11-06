@@ -66,15 +66,15 @@ int dump_file(int img, int inode_nr, int out)
 	uint32_t* blocks = inode.i_block;
 	char buf[block_size];
 	for (int i = 0; i < upper_bound; i++) {
-		int size = *remainfilesize > block_size ? block_size : *remainfilesize;
+		int size = remainfilesize > block_size ? block_size : *remainfilesize;
 		if(pread(img, buf, size, block_size*blocks[i]) != size){
 			return -errno;
 		}
 		if(write(out, buf, size) != size){
 			return -errno;
 		}
-		*remainfilesize -= block_size;
-		if (*remainfilesize <= 0){
+		remainfilesize -= block_size;
+		if (remainfilesize <= 0){
 			res =  0;
 		}
 	}
