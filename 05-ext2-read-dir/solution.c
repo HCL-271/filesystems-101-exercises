@@ -12,7 +12,44 @@ int make_free(uint32_t* a,uint32_t* b)
 	return 0;
 }
 
+int dr(int img, long int block_size, int upper_bound, uint32_t* blocks){
 
+	char buf[block_size];
+	
+
+	for (int i = 0; i < upper_bound; i++) {
+		if(blocks[i] == 0)
+			return 0;
+
+		if(pread(img, buf, block_size, block_size*blocks[i]) != block_size){
+			return -errno;
+		}
+		struct ext2_dir_entry_2* dir_entry = (struct ext2_dir_entry_2*) buf;
+
+		int remainsize = block_size;
+		
+		while (remainsize > 0){
+			char type = dir_entry -> file_type;
+			if(type == EXT2_FT_REG_FILE)
+				type = 'f';
+			else if(type == EXT2_FT_DIR)
+				type = 'd';
+
+			char filename[EXT2_NAME_LEN + 1];
+			memcpy(filename, dir_entry -> name, dir_entry -> name_len);
+			filename[dir_entry -> name_len] = '\0';
+
+			report_file(dir_entry -> inode, type, filename);
+
+			remainsize -= dir_entry -> rec_len;
+			dir_entry = (struct ext2_dir_entry_2*) ((char*) (dir_entry) +  dir_entry -> rec_len);
+		}
+		
+		
+	}
+	
+	return 1;
+}
 
 	
 	
@@ -64,7 +101,7 @@ int dump_dir(int img, int inode_nr)
 
 	int i = 0;
 	int currfs = lenght;
-	while( i < upper_bound) {
+	for (i = 0; i < upper_bound; i++) {
 		if(blocks[i] == 0){
 			res = 0;
 			break;
@@ -79,11 +116,11 @@ int dump_dir(int img, int inode_nr)
 		}
 		struct ext2_dir_entry_2* de = (struct ext2_dir_entry_2*) buf;
 
-		
+		int currfs = lenght;	
 		
 		while (currfs > 0){
 			char type = de -> file_type;
-			memcpy(filename2, de -> name, de -> name_len);
+			//memcpy(filename2, de -> name, de -> name_len);
 			if(type == EXT2_FT_REG_FILE)
 			{
 				type = 'f';
@@ -133,7 +170,7 @@ int dump_dir(int img, int inode_nr)
 	blocks = var1;
 	i = 0;
 	char buf1[(lenght)];
-	
+	/*
 	currfs = lenght;
 	while( i < upper_bound) {
 		if(blocks[i] == 0){
@@ -179,6 +216,10 @@ int dump_dir(int img, int inode_nr)
 	}
 	i = 0;
 	currfs = lenght;
+	
+	*/
+	
+	res = dir_reader(img, lenght, lenght/4, var1);
 	if(res <= 0)
 	{
 		
@@ -207,7 +248,7 @@ int dump_dir(int img, int inode_nr)
 			
 	upper_bound = l1;
 	blocks = var1;
-	
+	/*
 	i = 0;
 	char buf2[(lenght)];
 	
@@ -254,7 +295,8 @@ int dump_dir(int img, int inode_nr)
 		
 	i++;
 	}
-
+	*/
+		res = dir_reader(img, lenght, lenght/4, var1);
 		
 		if(res <= 0)
 		{
