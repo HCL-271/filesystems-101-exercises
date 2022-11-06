@@ -218,7 +218,7 @@ int dump_dir(int img, int inode_nr)
 	
 	}
 	i = 0;
-	currfs = lenght;
+	
 	
 	
 	
@@ -275,7 +275,7 @@ int dump_dir(int img, int inode_nr)
 		int currfs = lenght;
 		while (currfs > 0){
 			char type = de -> file_type;
-			memcpy(filename2, de -> name, de -> name_len);
+			
 			if(type == EXT2_FT_REG_FILE)
 			{
 				type = 'f';
