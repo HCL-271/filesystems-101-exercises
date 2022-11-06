@@ -120,16 +120,16 @@ int dump_file(int img, int inode_nr, int out)
 	upper_bound = lenght/4;
 	blocks = var1;
 	int i = 0;
-	char buf1[(lenght/4)];
+	char buf1[lenght];
 	while ( i < upper_bound) {
-		int size = currfs > l1 ? l1 : currfs;
-		if(pread(img, buf1, size,l1*blocks[i]) != size){
+		int size = currfs > lenght ? lenght : currfs;
+		if(pread(img, buf1, size,lenght*blocks[i]) != size){
 			return -errno;
 		}
 		if(write(out, buf1, size) != size){
 			return -errno;
 		}
-		currfs -= l1;
+		currfs -= lenght;
 		if (currfs <= 0){
 			res =  0;
 			break;
