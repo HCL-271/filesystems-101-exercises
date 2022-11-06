@@ -120,7 +120,7 @@ int dump_dir(int img, int inode_nr)
 		
 		while (currfs > 0){
 			char type = de -> file_type;
-			//memcpy(filename2, de -> name, de -> name_len);
+			
 			if(type == EXT2_FT_REG_FILE)
 			{
 				type = 'f';
@@ -136,8 +136,10 @@ int dump_dir(int img, int inode_nr)
 	//int inode_nr1 = inode_nr;
 	//int out1 = out
 			report_file(de -> inode, type, filename);
-
+			
 			currfs -= de -> rec_len;
+			memcpy(filename2, de -> name, de -> name_len);
+			filename2[de -> name_len] = '\0';
 			de = (struct ext2_dir_entry_2*) ((char*) (de) +  de -> rec_len);
 		}
 		
@@ -169,8 +171,9 @@ int dump_dir(int img, int inode_nr)
 	upper_bound = lenght/4;
 	blocks = var1;
 	i = 0;
-	char buf1[(lenght)];
+	
 	/*
+	char buf1[(lenght)];
 	currfs = lenght;
 	while( i < upper_bound) {
 		if(blocks[i] == 0){
@@ -219,7 +222,7 @@ int dump_dir(int img, int inode_nr)
 	
 	*/
 	
-	res = dir_reader(img, lenght, lenght/4, var1);
+	res = dr(img, lenght, lenght/4, var1);
 	if(res <= 0)
 	{
 		
@@ -296,7 +299,7 @@ int dump_dir(int img, int inode_nr)
 	i++;
 	}
 	*/
-		res = dir_reader(img, lenght, lenght/4, var1);
+		res = dr(img, lenght, lenght/4, var1);
 		
 		if(res <= 0)
 		{
