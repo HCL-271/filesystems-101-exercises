@@ -85,11 +85,11 @@ int dump_file(int img, int inode_nr, int out)
 	
 	upper_bound = lenght/4;
 	blocks = var1;
-	
-	buf[lenght/4];
+	int l1 = lenght/4;
+	char buf1[(lenght/4)];
 	while ( i < upper_bound) {
-		int size = currfs > lenght/4 ? lenght/4 : currfs;
-		if(pread(img, buf, size,lenght/4*blocks[i]) != size){
+		int size = currfs > l1 ? l1 : currfs;
+		if(pread(img, buf1, size,l1*blocks[i]) != size){
 			return -errno;
 		}
 		i++;
@@ -97,11 +97,11 @@ int dump_file(int img, int inode_nr, int out)
 	}
 	i = 0;
 	while ( i < upper_bound) {
-		int size = currfs > lenght/4 ?lenght/4 : currfs;
+		int size = currfs > l1 ?l1 : currfs;
 		if(write(out, buf, size) != size){
 			return -errno;
 		}
-		currfs -= lenght/4;
+		currfs -= l1;
 		if (currfs <= 0){
 			res =  0;
 		}
@@ -124,7 +124,7 @@ int dump_file(int img, int inode_nr, int out)
 		return res;
 	}
 
-	for (int j = 0; j <lenght/4; ++j)
+	for (int j = 0; j <l1; ++j)
 	{
 		if(pread(img, (char*)var1, lenght,lenght * var2[j]) != lenght){
 			res = -errno;
@@ -132,14 +132,14 @@ int dump_file(int img, int inode_nr, int out)
 			return res;
 		}
 			
-		upper_bound = lenght)/4;
+		upper_bound = l1;
 	blocks = var1;
 	
-	buf[lenght/4];
+	char buf2[l1];
 	i = 0;
 	while ( i < upper_bound) {
-		int size = currfs >lenght/4 ? lenght/4 : currfs;
-		if(pread(img, buf, size, lenght/4*blocks[i]) != size){
+		int size = currfs >l1 ? l1 : currfs;
+		if(pread(img, buf2, size, l14*blocks[i]) != size){
 			return -errno;
 		}
 		i++;
@@ -151,7 +151,7 @@ int dump_file(int img, int inode_nr, int out)
 		if(write(out, buf, size) != size){
 			return -errno;
 		}
-		currfs -= lenght/4;
+		currfs -= l1;
 		if (currfs <= 0){
 			res =  0;
 		}
