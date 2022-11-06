@@ -1,31 +1,8 @@
 #include "solution.h"
-
-
 #include <ext2fs/ext2fs.h>
 #include <unistd.h>
 #include <errno.h>
 
-
-
-int block_transfer(int img, int out, long int block_size, long long int* remainfilesize, int upper_bound, uint32_t* blocks){
-
-	char buf[block_size];
-	for (int i = 0; i < upper_bound; i++) {
-		int size = *remainfilesize > block_size ? block_size : *remainfilesize;
-		if(pread(img, buf, size, block_size*blocks[i]) != size){
-			return -errno;
-		}
-		if(write(out, buf, size) != size){
-			return -errno;
-		}
-		*remainfilesize -= block_size;
-		if (*remainfilesize <= 0){
-			return 0;
-		}
-	}
-	
-	return 1;
-}
 
 
 
@@ -35,12 +12,15 @@ int dump_file(int img, int inode_nr, int out)
 	
 	struct ext2_super_block trans_check = {};
 	
-	//if(pread(img, (char*)&esb, sizeof(struct ext2_super_block), SUPERBLOCK_OFFSET) != sizeof(struct ext2_super_block))
-	//	return -errno;
+	if(pread(img, (char*)&esb, sizeof(struct ext2_super_block), SUPERBLOCK_OFFSET) != sizeof(struct ext2_super_block))
+		return -errno;
+	
+	if(pread(img, (char*)&trans_check, sizeof(struct ext2_super_block), SUPERBLOCK_OFFSET) != sizeof(struct ext2_super_block))
+		return -errno;
 
 	long int block_size = 1024 << trans_check.s_log_block_size;	
 	
-	int addr_bg_descr = ((esb.s_first_data_block+1)*block_size + sizeof(struct ext2_group_desc)*((inode_nr-1) / esb.s_inodes_per_group));
+	int addr_bg_descr = ((esb.s_first_data_block+1)*(1024 << trans_check.s_log_block_size) + sizeof(struct ext2_group_desc)*((inode_nr-1) / esb.s_inodes_per_group));
 	
 	struct ext2_group_desc group_desc = {};
 	
