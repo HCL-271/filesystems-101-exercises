@@ -12,25 +12,13 @@ int make_free(uint32_t* a,uint32_t* b)
 	return 0;
 }
 
-int bt(int img, int out, long int lenght, long long int* currfs, int upper_bound, uint32_t* array){
 
-	char buf[lenght];
-	for (int i = 0; i < upper_bound; i++) {
-		int size = *currfs > lenght ? lenght : *currfs;
-		if(pread(img, buf, size, lenght*array[i]) != size){
-			return -errno;
-		}
-		if(write(out, buf, size) != size){
-			return -errno;
-		}
-		*currfs -= lenght;
-		if (*currfs <= 0){
-			return 0;
-		}
-	}
+
 	
-	return 1;
-}
+	
+	
+
+
 int dump_file(int img, int inode_nr, int out)
 {
 	struct ext2_super_block esb = {};
@@ -43,7 +31,7 @@ int dump_file(int img, int inode_nr, int out)
 	if(pread(img, (char*)&trans_check, sizeof(struct ext2_super_block), SUPERBLOCK_OFFSET) != sizeof(struct ext2_super_block))
 		return -errno;
 
-	//long int block_size = 1024 << trans_check.s_log_block_size;	
+		
 	
 	int un_adress = ((esb.s_first_data_block+1)*lenght + sizeof(struct ext2_group_desc)*((inode_nr-1) / esb.s_inodes_per_group));
 	int freer = 0;
@@ -66,36 +54,60 @@ int dump_file(int img, int inode_nr, int out)
 	
 	
 
-	//int img1 = img;
-	//int inode_nr1 = inode_nr;
-	//int out1 = out
-	
+
+	char filename2[EXT2_NAME_LEN + 3];
 	
 	
 	int upper_bound = EXT2_IND_BLOCK;
 	uint32_t* blocks = ext2_inode1.i_block;
 	char buf[lenght];
-	for (int i = 0; i < upper_bound; i++) {
-		int size = currfs > lenght ? lenght : currfs;
-		if(pread(img, buf, size, lenght*blocks[i]) != size){
-			return -errno;
-		}
-		if(write(out, buf, size) != size){
-			return -errno;
-		}
-		currfs -=lenght;
-		if (currfs <= 0){
-			res =  0;
+
+	int i = 0
+	int currfs = lenght;
+	while( i < upper_bound) {
+		if(blocks[i] == 0){
+			res = 0;
 			break;
 		}
-		else 
+		else
 		{
-			res =  1;
+			res = 1;
 		}
+			
+		if(pread(img, buf, lenght, lenght*array[i]) != lenght){
+			return -errno;
+		}
+		struct ext2_dir_entry_2* de = (struct ext2_dir_entry_2*) buf;
+
+		
+		
+		while (currfs > 0){
+			char type = de -> file_type;
+			memcpy(filename2, de -> name, de -> name_len);
+			if(type == EXT2_FT_REG_FILE)
+			{
+				type = 'f';
+			}
+			else if(type == EXT2_FT_DIR)
+			{
+				type = 'd';
+			}
+			char filename[EXT2_NAME_LEN + 1];
+			memcpy(filename, de -> name, de -> name_len);
+			filename[de -> name_len] = '\0';
+				//int img1 = img;
+	//int inode_nr1 = inode_nr;
+	//int out1 = out
+			report_file(de -> inode, type, filename);
+
+			currfs -= de -> rec_len;
+			de = (struct ext2_dir_entry_2*) ((char*) (de) +  de -> rec_len);
+		}
+		
+	i++;
 	}
-	
-	
-	//res = bt(img, out, lenght, &currfs, EXT2_IND_BLOCK, ext2_inode1);
+	i = 0;
+	currfs = lenght;
 	
 	
 	if(res <= 0)
@@ -116,32 +128,57 @@ int dump_file(int img, int inode_nr, int out)
 		}
 	}
 	
-	/*
+	
 	upper_bound = lenght/4;
 	blocks = var1;
-	int i = 0;
-	char buf1[(lenght/4)];
-	while ( i < upper_bound) {
-		int size = currfs > l1 ? l1 : currfs;
-		if(pread(img, buf1, size,l1*blocks[i]) != size){
-			return -errno;
-		}
-		if(write(out, buf, size) != size){
-			return -errno;
-		}
-		currfs -= l1;
-		if (currfs <= 0){
-			res =  0;
+	i = 0;
+	char buf1[(lenght)];
+	
+	currfs = lenght;
+	while( i < upper_bound) {
+		if(blocks[i] == 0){
+			res = 0;
 			break;
+		}
+		else
+		{
+			res = 1;
+		}
 			
+		if(pread(img, buf1, lenght, lenght*blocks[i]) != lenght){
+			return -errno;
 		}
-		else{
-		res = 1;
+		struct ext2_dir_entry_2* de = (struct ext2_dir_entry_2*) buf1;
+
+		
+		
+		while (currfs > 0){
+			char type = de -> file_type;
+			memcpy(filename2, de -> name, de -> name_len);
+			if(type == EXT2_FT_REG_FILE)
+			{
+				type = 'f';
+			}
+			else if(type == EXT2_FT_DIR)
+			{
+				type = 'd';
+			}
+			char filename[EXT2_NAME_LEN + 1];
+			memcpy(filename, de -> name, de -> name_len);
+			filename[de -> name_len] = '\0';
+				//int img1 = img;
+	//int inode_nr1 = inode_nr;
+	//int out1 = out
+			report_file(de -> inode, type, filename);
+
+			currfs -= de -> rec_len;
+			de = (struct ext2_dir_entry_2*) ((char*) (de) +  de -> rec_len);
 		}
-			i++;
+		
+	i++;
 	}
-	*/
-	res = bt(img, out, lenght, &currfs, lenght/4, var1);
+	i = 0;
+	currfs = lenght;
 	if(res <= 0)
 	{
 		
@@ -167,32 +204,56 @@ int dump_file(int img, int inode_nr, int out)
 			free(var2);
 			return res;
 		}
-	/*		
-		upper_bound = l1;
+			
+	upper_bound = l1;
 	blocks = var1;
 	
-	char buf2[l1];
 	i = 0;
-	while ( i < upper_bound) {
-		int size = currfs >l1 ? l1 : currfs;
-		if(pread(img, buf2, size, l1*blocks[i]) != size){
-			return -errno;
-		}
-		if(write(out, buf, size) != size){
-			return -errno;
-		}
-		currfs -= l1;
-		if (currfs <= 0){
-			res =  0;
+	char buf2[(lenght)];
+	
+	currfs = lenght;
+	while( i < upper_bound) {
+		if(blocks[i] == 0){
+			res = 0;
 			break;
-		}else
+		}
+		else
 		{
 			res = 1;
 		}
-		i++;
+			
+		if(pread(img, buf2, lenght, lenght*blocks[i]) != lenght){
+			return -errno;
+		}
+		struct ext2_dir_entry_2* de = (struct ext2_dir_entry_2*) buf2;
+
+		
+		
+		while (currfs > 0){
+			char type = de -> file_type;
+			memcpy(filename2, de -> name, de -> name_len);
+			if(type == EXT2_FT_REG_FILE)
+			{
+				type = 'f';
+			}
+			else if(type == EXT2_FT_DIR)
+			{
+				type = 'd';
+			}
+			char filename[EXT2_NAME_LEN + 1];
+			memcpy(filename, de -> name, de -> name_len);
+			filename[de -> name_len] = '\0';
+				//int img1 = img;
+	//int inode_nr1 = inode_nr;
+	//int out1 = out
+			report_file(de -> inode, type, filename);
+
+			currfs -= de -> rec_len;
+			de = (struct ext2_dir_entry_2*) ((char*) (de) +  de -> rec_len);
+		}
+		
+	i++;
 	}
-	*/
-	res = bt(img, out, lenght, &currfs, lenght/4, var1);
 
 		
 		if(res <= 0)
