@@ -89,14 +89,14 @@ int dump_dir(int img, int inode_nr)
 	int res = -1;
 	
 	
-	
+	int upper_bound = EXT2_IND_BLOCK;
+	uint32_t* blocks = ext2_inode1.i_block;
 
 	/*
 	
 	
 	
-	int upper_bound = EXT2_IND_BLOCK;
-	uint32_t* blocks = ext2_inode1.i_block;
+	
 	char buf[lenght];
 
 	int i = 0;
@@ -146,7 +146,7 @@ int dump_dir(int img, int inode_nr)
 	i++;
 	}
 	*/
-	int res = dr(img, lenght, EXT2_IND_BLOCK, inode.i_block);
+	res = dr(img, lenght, EXT2_IND_BLOCK, ext2_inode1.i_block);
 	if(res <= 0)
 	{
 		free(var1);
