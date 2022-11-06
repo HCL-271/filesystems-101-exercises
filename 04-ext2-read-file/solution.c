@@ -16,7 +16,7 @@ int dump_file(int img, int inode_nr, int out)
 	struct ext2_super_block esb = {};
 	
 	struct ext2_super_block trans_check = {};
-	long int lenght = 1024 << super_block.s_log_block_size;
+	long int lenght = 1024 << esb.s_log_block_size;
 	if(pread(img, (char*)&esb, sizeof(struct ext2_super_block), SUPERBLOCK_OFFSET) != sizeof(struct ext2_super_block))
 		return -errno;
 	
@@ -71,7 +71,7 @@ int dump_file(int img, int inode_nr, int out)
 		return res;
 	}
 
-	siz_chk += 1;
+	siz_chck += 1;
 	if(pread(img, (char*)var1, lenght, lenght * ext2_inode1.i_block[EXT2_IND_BLOCK]) != lenght){
 		res = -errno;
 			
@@ -165,6 +165,10 @@ int dump_file(int img, int inode_nr, int out)
 		freer = make_free(var1,var2);
 		return res;
 		}
+	}
+	freer += 1;
+	if (freer < 0){
+		return errno;
 	}
 
 		freer = make_free(var1,var2);
