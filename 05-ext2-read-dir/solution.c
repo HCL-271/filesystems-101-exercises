@@ -100,7 +100,7 @@ int dump_dir(int img, int inode_nr)
 	char buf[lenght];
 
 	int i = 0;
-	int currfs = lenght;
+	
 	for (i = 0; i < upper_bound; i++) {
 		if(blocks[i] == 0){
 			res = 0;
