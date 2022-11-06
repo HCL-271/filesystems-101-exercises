@@ -116,7 +116,7 @@ int dump_file(int img, int inode_nr, int out)
 		}
 	}
 	
-	/*
+	
 	upper_bound = lenght/4;
 	blocks = var1;
 	int i = 0;
@@ -126,7 +126,7 @@ int dump_file(int img, int inode_nr, int out)
 		if(pread(img, buf1, size,l1*blocks[i]) != size){
 			return -errno;
 		}
-		if(write(out, buf, size) != size){
+		if(write(out, buf1, size) != size){
 			return -errno;
 		}
 		currfs -= l1;
@@ -140,8 +140,8 @@ int dump_file(int img, int inode_nr, int out)
 		}
 			i++;
 	}
-	*/
-	res = bt(img, out, lenght, &currfs, lenght/4, var1);
+	
+	//res = bt(img, out, lenght, &currfs, lenght/4, var1);
 	if(res <= 0)
 	{
 		
