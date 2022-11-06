@@ -112,7 +112,8 @@ int dump_file(int img, int inode_nr, int out)
 	if(res <= 0)
 	{
 		
-		freer = make_free(var1,var2);
+		free(var1);
+			free(var2);
 		return res;
 	}
 
@@ -120,7 +121,8 @@ int dump_file(int img, int inode_nr, int out)
 
 	if(pread(img, (char*)var2, lenght, lenght * ext2_inode1.i_block[EXT2_IND_BLOCK+1]) !=lenght){
 		res = -errno;
-		freer = make_free(var1,var2);
+		free(var1);
+			free(var2);
 		return res;
 	}
 
@@ -128,7 +130,8 @@ int dump_file(int img, int inode_nr, int out)
 	{
 		if(pread(img, (char*)var1, lenght,lenght * var2[j]) != lenght){
 			res = -errno;
-			freer = make_free(var1,var2);
+			free(var1);
+			free(var2);
 			return res;
 		}
 			
@@ -162,7 +165,8 @@ int dump_file(int img, int inode_nr, int out)
 		
 		if(res <= 0)
 		{
-		freer = make_free(var1,var2);
+		free(var1);
+			free(var2);
 		return res;
 		}
 	}
@@ -171,6 +175,7 @@ int dump_file(int img, int inode_nr, int out)
 		return errno;
 	}
 
-		freer = make_free(var1,var2);
+		free(var1);
+			free(var2);
 return res;
 }
