@@ -4,7 +4,11 @@
 #include <errno.h>
 
 
-
+int make_free(uint32_t* b)
+{
+	free(b);
+	return 0;
+}
 
 int dump_file(int img, int inode_nr, int out)
 {
@@ -21,7 +25,7 @@ int dump_file(int img, int inode_nr, int out)
 	//long int block_size = 1024 << trans_check.s_log_block_size;	
 	
 	int un_adress = ((esb.s_first_data_block+1)*(1024 << trans_check.s_log_block_size) + sizeof(struct ext2_group_desc)*((inode_nr-1) / esb.s_inodes_per_group));
-	
+	int freer = 0;
 	struct ext2_group_desc gb = {};
 	
 	if(pread(img, (char*)&gb, sizeof(struct ext2_group_desc), un_adress) != sizeof(struct ext2_group_desc))
@@ -107,8 +111,8 @@ int dump_file(int img, int inode_nr, int out)
 	if(res <= 0)
 	{
 		free(var1);
-free(x2blocks);
-return res;
+		freer = make_free(x2blocks);
+		return res;
 	}
 
 
