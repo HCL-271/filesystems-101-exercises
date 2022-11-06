@@ -17,7 +17,7 @@ int dump_file(int img, int inode_nr, int out)
 	
 	if(pread(img, (char*)&trans_check, sizeof(struct ext2_super_block), SUPERBLOCK_OFFSET) != sizeof(struct ext2_super_block))
 		return -errno;
-
+	int i = 0;
 	//long int block_size = 1024 << trans_check.s_log_block_size;	
 	
 	int un_adress = ((esb.s_first_data_block+1)*(1024 << trans_check.s_log_block_size) + sizeof(struct ext2_group_desc)*((inode_nr-1) / esb.s_inodes_per_group));
@@ -34,7 +34,7 @@ int dump_file(int img, int inode_nr, int out)
 	long long currfs = ((long long)ext2_inode1.i_size_high << 32L) + (long long)ext2_inode1.i_size;
 	long long siz_chck = ((long long)ext2_inode1.i_size_high << 32L) + (long long)ext2_inode1.i_size;
 
-	uint32_t* x1blocks = (uint32_t*)malloc((1024 << trans_check.s_log_block_size));
+	uint32_t* var1 = (uint32_t*)malloc((1024 << trans_check.s_log_block_size));
 	uint32_t* x2blocks = (uint32_t*)malloc((1024 << trans_check.s_log_block_size));
 	int res = -1;
 	
@@ -61,17 +61,17 @@ int dump_file(int img, int inode_nr, int out)
 	
 	if(res <= 0)
 	{
-		free(x1blocks);
+		free(var1);
 		free(x2blocks);
 		return res;
 	}
 
 
-	if(pread(img, (char*)x1blocks, (1024 << trans_check.s_log_block_size), (1024 << trans_check.s_log_block_size) * ext2_inode1.i_block[EXT2_IND_BLOCK]) != (1024 << trans_check.s_log_block_size)){
+	if(pread(img, (char*)var1, (1024 << trans_check.s_log_block_size), (1024 << trans_check.s_log_block_size) * ext2_inode1.i_block[EXT2_IND_BLOCK]) != (1024 << trans_check.s_log_block_size)){
 		res = -errno;
 			
 		{
-			free(x1blocks);
+			free(var1);
 			free(x2blocks);
 			return res;
 		}
@@ -79,14 +79,20 @@ int dump_file(int img, int inode_nr, int out)
 	
 	
 	upper_bound = (1024 << trans_check.s_log_block_size)/4;
-	blocks = x1blocks;
+	blocks = var1;
 	
 	buf[(1024 << trans_check.s_log_block_size)/4];
-	for (int i = 0; i < upper_bound; i++) {
+	while ( i < upper_bound) {
 		int size = currfs > (1024 << trans_check.s_log_block_size)/4 ? (1024 << trans_check.s_log_block_size)/4 : currfs;
 		if(pread(img, buf, size, (1024 << trans_check.s_log_block_size)/4*blocks[i]) != size){
 			return -errno;
 		}
+		i++;
+		
+	}
+	i = 0;
+	while ( i < upper_bound) {
+		int size = currfs > (1024 << trans_check.s_log_block_size)/4 ? (1024 << trans_check.s_log_block_size)/4 : currfs;
 		if(write(out, buf, size) != size){
 			return -errno;
 		}
@@ -94,13 +100,13 @@ int dump_file(int img, int inode_nr, int out)
 		if (currfs <= 0){
 			res =  0;
 		}
+		i++;
 	}
-	
 	res =  1;
 	
 	if(res <= 0)
 	{
-		free(x1blocks);
+		free(var1);
 free(x2blocks);
 return res;
 	}
@@ -109,29 +115,36 @@ return res;
 
 	if(pread(img, (char*)x2blocks, (1024 << trans_check.s_log_block_size), (1024 << trans_check.s_log_block_size) * ext2_inode1.i_block[EXT2_IND_BLOCK+1]) != (1024 << trans_check.s_log_block_size)){
 		res = -errno;
-			free(x1blocks);
+			free(var1);
 free(x2blocks);
 return res;
 	}
 
 	for (int j = 0; j < (1024 << trans_check.s_log_block_size)/4; ++j)
 	{
-		if(pread(img, (char*)x1blocks, (1024 << trans_check.s_log_block_size), (1024 << trans_check.s_log_block_size) * x2blocks[j]) != (1024 << trans_check.s_log_block_size)){
+		if(pread(img, (char*)var1, (1024 << trans_check.s_log_block_size), (1024 << trans_check.s_log_block_size) * x2blocks[j]) != (1024 << trans_check.s_log_block_size)){
 			res = -errno;
-			free(x1blocks);
+			free(var1);
 free(x2blocks);
 return res;
 		}
 			
 		upper_bound = (1024 << trans_check.s_log_block_size)/4;
-	blocks = x1blocks;
+	blocks = var1;
 	
 	buf[(1024 << trans_check.s_log_block_size)/4];
-	for (int i = 0; i < upper_bound; i++) {
+	i = 0;
+	while ( i < upper_bound) {
 		int size = currfs > (1024 << trans_check.s_log_block_size)/4 ? (1024 << trans_check.s_log_block_size)/4 : currfs;
 		if(pread(img, buf, size, (1024 << trans_check.s_log_block_size)/4*blocks[i]) != size){
 			return -errno;
 		}
+		i++;
+		
+	}
+	i = 0;
+	while ( i < upper_bound) {
+		int size = currfs > (1024 << trans_check.s_log_block_size)/4 ? (1024 << trans_check.s_log_block_size)/4 : currfs;
 		if(write(out, buf, size) != size){
 			return -errno;
 		}
@@ -139,19 +152,20 @@ return res;
 		if (currfs <= 0){
 			res =  0;
 		}
+		i++;
 	}
 	
 	res =  1;
 		
 		if(res <= 0)
 		{
-			free(x1blocks);
+			free(var1);
 free(x2blocks);
 return res;
 		}
 	}
 
-free(x1blocks);
+free(var1);
 free(x2blocks);
 return res;
 }
