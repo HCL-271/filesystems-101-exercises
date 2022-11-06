@@ -71,7 +71,7 @@ int dump_file(int img, int inode_nr, int out)
 	//int out1 = out
 	
 	
-	/*
+	
 	int upper_bound = EXT2_IND_BLOCK;
 	uint32_t* blocks = ext2_inode1.i_block;
 	char buf[lenght];
@@ -93,9 +93,9 @@ int dump_file(int img, int inode_nr, int out)
 			res =  1;
 		}
 	}
-	*/
 	
-	res = bt(img, out, lenght, &currfs, EXT2_IND_BLOCK, ext2_inode1);
+	
+	//res = bt(img, out, lenght, &currfs, EXT2_IND_BLOCK, ext2_inode1);
 	
 	
 	if(res <= 0)
