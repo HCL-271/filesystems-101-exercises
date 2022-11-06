@@ -16,7 +16,7 @@ int bt(int img, int out, long int lenght, long long int* currfs, int upper_bound
 
 	char buf[lenght];
 	for (int i = 0; i < upper_bound; i++) {
-		int size = *currfs > lenght ? block_size : *currfs;
+		int size = *currfs > lenght ? lenght : *currfs;
 		if(pread(img, buf, size, lenght*array[i]) != size){
 			return -errno;
 		}
@@ -95,7 +95,7 @@ int dump_file(int img, int inode_nr, int out)
 	}
 	*/
 	
-	int res = block_transfer(img, out, lenght, &currfs, EXT2_IND_BLOCK, ext2_inode1);
+	res = bt(img, out, lenght, &currfs, EXT2_IND_BLOCK, ext2_inode1);
 	
 	
 	if(res <= 0)
@@ -141,7 +141,7 @@ int dump_file(int img, int inode_nr, int out)
 			i++;
 	}
 	*/
-	res = block_transfer(img, out, lenght, &currfs, lenght/4, var1);
+	res = bt(img, out, lenght, &currfs, lenght/4, var1);
 	if(res <= 0)
 	{
 		
@@ -194,7 +194,7 @@ int dump_file(int img, int inode_nr, int out)
 		i++;
 	}
 	*/
-	res = block_transfer(img, out, lenght, &currfs, lenght/4, var1);
+	res = bt(img, out, lenght, &currfs, lenght/4, var1);
 
 		
 		if(res <= 0)
