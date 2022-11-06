@@ -145,8 +145,7 @@ int dump_dir(int img, int inode_nr)
 		
 	i++;
 	}
-	i = 0;
-	currfs = lenght;
+	
 	
 	
 	if(res <= 0)
@@ -173,8 +172,9 @@ int dump_dir(int img, int inode_nr)
 	i = 0;
 	
 	/*
+	
 	char buf1[(lenght)];
-	currfs = lenght;
+	
 	while( i < upper_bound) {
 		if(blocks[i] == 0){
 			res = 0;
@@ -190,7 +190,7 @@ int dump_dir(int img, int inode_nr)
 		}
 		struct ext2_dir_entry_2* de = (struct ext2_dir_entry_2*) buf1;
 
-		
+		int currfs = lenght;
 		
 		while (currfs > 0){
 			char type = de -> file_type;
@@ -254,8 +254,7 @@ int dump_dir(int img, int inode_nr)
 	/*
 	i = 0;
 	char buf2[(lenght)];
-	
-	currfs = lenght;
+
 	while( i < upper_bound) {
 		if(blocks[i] == 0){
 			res = 0;
@@ -272,7 +271,7 @@ int dump_dir(int img, int inode_nr)
 		struct ext2_dir_entry_2* de = (struct ext2_dir_entry_2*) buf2;
 
 		
-		
+		int currfs = lenght;
 		while (currfs > 0){
 			char type = de -> file_type;
 			memcpy(filename2, de -> name, de -> name_len);
