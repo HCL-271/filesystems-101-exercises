@@ -91,8 +91,8 @@ int dump_dir(int img, int inode_nr)
 	
 	
 
-
-	char filename2[EXT2_NAME_LEN + 3];
+	/*
+	
 	
 	
 	int upper_bound = EXT2_IND_BLOCK;
@@ -138,16 +138,15 @@ int dump_dir(int img, int inode_nr)
 			report_file(de -> inode, type, filename);
 			
 			currfs -= de -> rec_len;
-			memcpy(filename2, de -> name, de -> name_len);
+			
 			filename2[de -> name_len] = '\0';
 			de = (struct ext2_dir_entry_2*) ((char*) (de) +  de -> rec_len);
 		}
 		
 	i++;
 	}
-	
-	
-	
+	*/
+	int res = dr(img, lenght, EXT2_IND_BLOCK, inode.i_block);
 	if(res <= 0)
 	{
 		free(var1);
