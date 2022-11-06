@@ -78,18 +78,19 @@ int dump_file(int img, int inode_nr, int out)
 	}
 	
 	
-	upper_bound = EXT2_IND_BLOCK;
-	blocks = inode.i_block;
-	buf[(1024 << trans_check.s_log_block_size)];
+	upper_bound = (1024 << trans_check.s_log_block_size)/4;
+	blocks = x1blocks;
+	
+	buf[(1024 << trans_check.s_log_block_size)/4];
 	for (int i = 0; i < upper_bound; i++) {
-		int size = remainfilesize > (1024 << trans_check.s_log_block_size) ? (1024 << trans_check.s_log_block_size) : remainfilesize;
-		if(pread(img, buf, size, (1024 << trans_check.s_log_block_size)*blocks[i]) != size){
+		int size = remainfilesize > (1024 << trans_check.s_log_block_size)/4 ? (1024 << trans_check.s_log_block_size)/4 : remainfilesize;
+		if(pread(img, buf, size, (1024 << trans_check.s_log_block_size)/4*blocks[i]) != size){
 			return -errno;
 		}
 		if(write(out, buf, size) != size){
 			return -errno;
 		}
-		remainfilesize -= (1024 << trans_check.s_log_block_size);
+		remainfilesize -= (1024 << trans_check.s_log_block_size)/4;
 		if (remainfilesize <= 0){
 			res =  0;
 		}
@@ -122,7 +123,26 @@ free(x2blocks);
 return res;
 		}
 			
-		res = block_transfer(img, out, (1024 << trans_check.s_log_block_size), &remainfilesize, (1024 << trans_check.s_log_block_size)/4, x1blocks);
+		upper_bound = (1024 << trans_check.s_log_block_size)/4;
+	blocks = x1blocks;
+	
+	buf[(1024 << trans_check.s_log_block_size)/4];
+	for (int i = 0; i < upper_bound; i++) {
+		int size = remainfilesize > (1024 << trans_check.s_log_block_size)/4 ? (1024 << trans_check.s_log_block_size)/4 : remainfilesize;
+		if(pread(img, buf, size, (1024 << trans_check.s_log_block_size)/4*blocks[i]) != size){
+			return -errno;
+		}
+		if(write(out, buf, size) != size){
+			return -errno;
+		}
+		remainfilesize -= (1024 << trans_check.s_log_block_size)/4;
+		if (remainfilesize <= 0){
+			res =  0;
+		}
+	}
+	
+	res =  1;
+		
 		if(res <= 0)
 		{
 			free(x1blocks);
