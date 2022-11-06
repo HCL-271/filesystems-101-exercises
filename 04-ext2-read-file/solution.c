@@ -4,8 +4,9 @@
 #include <errno.h>
 
 
-int make_free(uint32_t* b)
+int make_free(uint32_t* a,uint32_t* b)
 {
+	free(a);
 	free(b);
 	return 0;
 }
@@ -39,7 +40,7 @@ int dump_file(int img, int inode_nr, int out)
 	long long siz_chck = ((long long)ext2_inode1.i_size_high << 32L) + (long long)ext2_inode1.i_size;
 
 	uint32_t* var1 = (uint32_t*)malloc((1024 << trans_check.s_log_block_size));
-	uint32_t* x2blocks = (uint32_t*)malloc((1024 << trans_check.s_log_block_size));
+	uint32_t* var2 = (uint32_t*)malloc((1024 << trans_check.s_log_block_size));
 	int res = -1;
 	
 	int upper_bound = EXT2_IND_BLOCK;
@@ -66,7 +67,7 @@ int dump_file(int img, int inode_nr, int out)
 	if(res <= 0)
 	{
 		free(var1);
-		free(x2blocks);
+		free(var2);
 		return res;
 	}
 
@@ -76,7 +77,7 @@ int dump_file(int img, int inode_nr, int out)
 			
 		{
 			free(var1);
-			free(x2blocks);
+			free(var2);
 			return res;
 		}
 	}
@@ -110,27 +111,25 @@ int dump_file(int img, int inode_nr, int out)
 	
 	if(res <= 0)
 	{
-		free(var1);
-		freer = make_free(x2blocks);
+		
+		freer = make_free(var1,var2);
 		return res;
 	}
 
 
 
-	if(pread(img, (char*)x2blocks, (1024 << trans_check.s_log_block_size), (1024 << trans_check.s_log_block_size) * ext2_inode1.i_block[EXT2_IND_BLOCK+1]) != (1024 << trans_check.s_log_block_size)){
+	if(pread(img, (char*)var2, (1024 << trans_check.s_log_block_size), (1024 << trans_check.s_log_block_size) * ext2_inode1.i_block[EXT2_IND_BLOCK+1]) != (1024 << trans_check.s_log_block_size)){
 		res = -errno;
-			free(var1);
-free(x2blocks);
-return res;
+		freer = make_free(var1,var2);
+		return res;
 	}
 
 	for (int j = 0; j < (1024 << trans_check.s_log_block_size)/4; ++j)
 	{
-		if(pread(img, (char*)var1, (1024 << trans_check.s_log_block_size), (1024 << trans_check.s_log_block_size) * x2blocks[j]) != (1024 << trans_check.s_log_block_size)){
+		if(pread(img, (char*)var1, (1024 << trans_check.s_log_block_size), (1024 << trans_check.s_log_block_size) * var2[j]) != (1024 << trans_check.s_log_block_size)){
 			res = -errno;
-			free(var1);
-free(x2blocks);
-return res;
+			freer = make_free(var1,var2);
+			return res;
 		}
 			
 		upper_bound = (1024 << trans_check.s_log_block_size)/4;
@@ -163,13 +162,11 @@ return res;
 		
 		if(res <= 0)
 		{
-			free(var1);
-free(x2blocks);
-return res;
+		freer = make_free(var1,var2);
+		return res;
 		}
 	}
 
-free(var1);
-free(x2blocks);
+		freer = make_free(var1,var2);
 return res;
 }
