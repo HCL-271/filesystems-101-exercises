@@ -60,6 +60,29 @@ int dump_file(int img, int inode_nr, int out)
 
 	
 	int res = block_transfer(img, out, block_size, &remainfilesize, EXT2_IND_BLOCK, inode.i_block);
+	
+//int block_transfer(int img, int out, long int block_size, long long int* remainfilesize, int upper_bound, uint32_t* blocks){
+	int upper_bound = EXT2_IND_BLOCK;
+	uint32_t* blocks = inode.i_block;
+	char buf[block_size];
+	for (int i = 0; i < upper_bound; i++) {
+		int size = *remainfilesize > block_size ? block_size : *remainfilesize;
+		if(pread(img, buf, size, block_size*blocks[i]) != size){
+			return -errno;
+		}
+		if(write(out, buf, size) != size){
+			return -errno;
+		}
+		*remainfilesize -= block_size;
+		if (*remainfilesize <= 0){
+			res =  0;
+		}
+	}
+	
+	res =  1;
+	
+	
+	
 	if(res <= 0)
 	{
 		free(x1blocks);
