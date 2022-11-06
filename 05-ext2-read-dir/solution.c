@@ -62,7 +62,7 @@ int dump_file(int img, int inode_nr, int out)
 	uint32_t* blocks = ext2_inode1.i_block;
 	char buf[lenght];
 
-	int i = 0
+	int i = 0;
 	int currfs = lenght;
 	while( i < upper_bound) {
 		if(blocks[i] == 0){
@@ -74,7 +74,7 @@ int dump_file(int img, int inode_nr, int out)
 			res = 1;
 		}
 			
-		if(pread(img, buf, lenght, lenght*array[i]) != lenght){
+		if(pread(img, buf, lenght, lenght*blocks[i]) != lenght){
 			return -errno;
 		}
 		struct ext2_dir_entry_2* de = (struct ext2_dir_entry_2*) buf;
