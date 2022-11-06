@@ -4,6 +4,7 @@
 #include <errno.h>
 
 
+
 int make_free(uint32_t* a,uint32_t* b)
 {
 	free(a);
@@ -43,6 +44,13 @@ int dump_file(int img, int inode_nr, int out)
 	uint32_t* var2 = (uint32_t*)malloc(lenght);
 	int res = -1;
 	
+	
+	
+
+	
+	
+	
+	
 	int upper_bound = EXT2_IND_BLOCK;
 	uint32_t* blocks = ext2_inode1.i_block;
 	char buf[lenght];
@@ -57,10 +65,15 @@ int dump_file(int img, int inode_nr, int out)
 		currfs -=lenght;
 		if (currfs <= 0){
 			res =  0;
+			break;
+		}
+		else 
+		{
+			res =  1;
 		}
 	}
 	
-	res =  1;
+	
 	
 	
 	
