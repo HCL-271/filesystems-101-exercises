@@ -57,7 +57,7 @@ int dump_file(int img, int inode_nr, int out)
 	//printf("%ld %d\n", sizeof(struct ext2_inode), esb.s_inode_size);
 	uint32_t* x1blocks = (uint32_t*)malloc(block_size);
 	uint32_t* x2blocks = (uint32_t*)malloc(block_size);
-
+	int res = -1;
 	
 	//int res = block_transfer(img, out, block_size, &remainfilesize, EXT2_IND_BLOCK, inode.i_block);
 	
@@ -101,9 +101,9 @@ return res;}
 	}
 	//res = block_transfer(img, out, block_size, &remainfilesize, block_size/4, x1blocks);
 	
-	int upper_bound = EXT2_IND_BLOCK;
-	uint32_t* blocks = inode.i_block;
-	char buf[block_size];
+	upper_bound = EXT2_IND_BLOCK;
+	blocks = inode.i_block;
+	buf[block_size];
 	for (int i = 0; i < upper_bound; i++) {
 		int size = remainfilesize > block_size ? block_size : remainfilesize;
 		if(pread(img, buf, size, block_size*blocks[i]) != size){
