@@ -243,8 +243,8 @@ int node_reader(int img, int before_pos, struct ext2_super_block* ext2_super_blo
   off_t offset =
       ext2_group_desc1->bg_inode_table * bs + ext2_super_block1->s_inode_size * inode_pos1;
 	
- // int ret = preadv(img, str_iovec1, 1, offset);
-  return preadv(img, str_iovec1, 1, offset);
+  int ret = preadv(img, str_iovec1, 1, offset);
+  return ret;
 }
 int rgd1(int img, int integer1, struct ext2_super_block* ext2_super_block1,
                      struct iovec* descrptn) {
@@ -254,8 +254,8 @@ int rgd1(int img, int integer1, struct ext2_super_block* ext2_super_block1,
   size_t element_poas = descrptn->iov_len * (integer1 / ext2_super_block1->s_inodes_per_group);
 
   off_t offset1 = bs + element_poas + ext2_super_block1->s_first_data_block * bs;
- // int ret = preadv(img, descrptn, 1, offset1);
-  return preadv(img, descrptn, 1, offset1);
+  int ret = preadv(img, descrptn, 1, offset1);
+  return ret;
 }
 
 int headway(struct iovec* spsi, struct iovec* speaker_group,
@@ -296,14 +296,7 @@ size_t	aaray_size1 = 1024 << (spsi->iov_base)->s_log_block_size;
   return 0;
 }
 
-void revilaion(struct iovec* s1, struct iovec* s2,
-           struct iovec* s3, struct file_type* data_container) 
-{
-  free(data_container);
-  cler_i(s3);
-  cler_i(s1);
-  cler_i(s2);
-}
+
 
 size_t take_way(char* destination, const char* way_cnst) 
 {
@@ -315,7 +308,7 @@ size_t take_way(char* destination, const char* way_cnst)
   }
 	
   destination[i] = '\0';
-  // if (path[i] == '\0') return 0;
+
   return i;
 }
 
@@ -362,12 +355,18 @@ int dump_file(int img, const char* way_const, int returner)
     }
 
     if (headway(s1, s2, s3, data_container, img) < 0) {
-      revilaion(s1, s2, s3, data_container);
+     free(data_container);
+  cler_i(s3);
+  cler_i(s1);
+  cler_i(s2);
       return errno;
     }
     
     if (chocher && data_container->file_type1 != EXT2_FT_DIR) {
-      revilaion(s1, s2, s3, data_container);
+     free(data_container);
+  cler_i(s3);
+  cler_i(s1);
+  cler_i(s2);
       return -ENOTDIR;
     }
     lght = take_way(file_name, way_const);
@@ -378,10 +377,16 @@ int dump_file(int img, const char* way_const, int returner)
   data_container->matrix = 2;
 
   if (headway(s1, s2, s3, data_container, img) < 0) {
-    revilaion(s1, s2, s3, data_container);
+    free(data_container);
+  cler_i(s3);
+  cler_i(s1);
+  cler_i(s2);
     return errno;
   }
 
-  revilaion(s1, s2, s3, data_container);
+ free(data_container);
+  cler_i(s3);
+  cler_i(s1);
+  cler_i(s2);
   return 0;
 }
