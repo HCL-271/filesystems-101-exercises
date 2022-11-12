@@ -285,7 +285,7 @@ size_t	aaray_size1 = 1024 << (spsi->iov_base)->s_log_block_size;
                        speaker_group) < 0 ||
       node_reader(img, prevoius_node, spsi->iov_base,
                  speaker_group->iov_base, srteuct_iovec) < 0 ||
-      transponse_data(img, inode->iov_base, data_container) < 0)
+      transponse_data(img, srteuct_iovec->iov_base, data_container) < 0)
       
   /*if (checker1< 0 ||
       checker2 < 0 ||
