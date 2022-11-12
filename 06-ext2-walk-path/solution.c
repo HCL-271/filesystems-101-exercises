@@ -81,7 +81,7 @@ void return_vvod(struct iovec* free_space, struct file_type* file_type2) {
     memcpy(naimenovanie, ext2_dir_entry_21->name, ext2_dir_entry_21->name_len);
     naimenovanie[ext2_dir_entry_21->name_len] = '\0';
 
-    if (strcmp(naimenovanie, file_type2->name) == 0) {
+    if (strcmp(naimenovanie, file_type2->naimenovanie) == 0) {
       file_type2->inode_nr = ext2_dir_entry_21->inode - 1;
       file_type2->file_type1 = ext2_dir_entry_21->file_type;
     }
@@ -285,7 +285,7 @@ size_t	aaray_size1 = 1024 << (spsi->iov_base)->s_log_block_size;
                        speaker_group) < 0 ||
       node_reader(img, prevoius_node, spsi->iov_base,
                  speaker_group->iov_base, srteuct_iovec) < 0 ||
-      transponse_data(img, inode->iov_base, file) < 0)
+      transponse_data(img, inode->iov_base, data_container) < 0)
       
   /*if (checker1< 0 ||
       checker2 < 0 ||
@@ -358,7 +358,7 @@ int dump_file(int img, const char* way_const, int returner)
 	
   while (lght > 0) 
   {
-    int chocher = (strchr(path, '/') != NULL);
+    int chocher = (strchr(way_const, '/') != NULL);
     strcpy(data_container->naimenovanie, file_name);
     way_const += lght;
     if (way_const[0] == '/') 
