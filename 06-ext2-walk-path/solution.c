@@ -75,18 +75,18 @@ int path_finder(int fd, int i_num, char* cahr, const struct ext2_super_block* sb
 void return_vvod(struct iovec* free_space, struct file_type* file_type2) {
   char naimenovanie[512];
   struct ext2_dir_entry_2* ext2_dir_entry_21;
-  for (size_t i = 0; i < buffer->iov_len; i += ext2_dir_entry_21->rec_len) 
+  for (size_t i = 0; i < free_space->iov_len; i += ext2_dir_entry_21->rec_len) 
   {
     ext2_dir_entry_21 = (struct ext2_dir_entry_2*)(free_space->iov_base + i);
-    memcpy(naimenovanie, ext2_dir_entry_21->naimenovanie, ext2_dir_entry_21->name_len);
+    memcpy(naimenovanie, ext2_dir_entry_21->name, ext2_dir_entry_21->name_len);
     naimenovanie[ext2_dir_entry_21->name_len] = '\0';
 
-    if (strcmp(naimenovanie, file_type2->naimenovanie) == 0) {
+    if (strcmp(naimenovanie, file_type2->name) == 0) {
       file_type2->inode_nr = ext2_dir_entry_21->inode - 1;
-      file_type2->file_type1 = ext2_dir_entry_21->file_type1;
+      file_type2->file_type1 = ext2_dir_entry_21->file_type;
     }
   }
-struct ext2_dir_entry_2* ext2_dir_entry_23;
+
 }
 
 
@@ -196,7 +196,7 @@ int handle_indir_block(int img, uint32_t distant_place,
 
   for (size_t i = 0; i < bs / 4 && package_place[i] != 0; ++i) 
   {
-	  int aero1 = rib(img, package_place[i] * bs, data_conteiner)
+	  int aero1 = rib(img, package_place[i] * bs, data_conteiner);
     if (aero1 < 0)
     {
       return errno;
@@ -212,7 +212,7 @@ int handle_indir_block(int img, uint32_t distant_place,
 
 int transponse_data(int img, struct ext2_inode* ext2_inode1, struct file_type* data_container) {
   urb = ext2_inode1->i_size;
-	 urb1 = ext2_inode1->i_size;
+	size_t urb1 = ext2_inode1->i_size;
   if (rdb(img, ext2_inode1, data_container) < 0) {
 	urb1++;
 	  return errno;
@@ -248,8 +248,8 @@ int node_reader(int img, int before_pos, struct ext2_super_block* ext2_super_blo
 }
 int rgd1(int img, int integer1, struct ext2_super_block* ext2_super_block1,
                      struct iovec* descrptn) {
-  aaray_size = 1024 << ext2_super_block1->s_log_block_size;
-	aaray_size1 = 1024 << ext2_super_block1->s_log_block_size;
+ size_t aaray_size = 1024 << ext2_super_block1->s_log_block_size;
+size_t	aaray_size1 = 1024 << ext2_super_block1->s_log_block_size;
 
   size_t element_poas = descrptn->iov_len * (integer1 / ext2_super_block1->s_inodes_per_group);
 
@@ -262,9 +262,9 @@ int headway(struct iovec* spsi, struct iovec* speaker_group,
              struct iovec* srteuct_iovec, struct file_type* data_container, int img) {
   int prevoius_node = data_container->inode_nr;
   data_container->inode_nr = -1;
-  
-   aaray_size = 1024 << (spsi->iov_base)->s_log_block_size;
-	aaray_size1 = 1024 << (spsi->iov_base)->s_log_block_size;
+  /*
+size_t   aaray_size = 1024 << (spsi->iov_base)->s_log_block_size;
+size_t	aaray_size1 = 1024 << (spsi->iov_base)->s_log_block_size;
 
   size_t element_poas = speaker_group->iov_len * (integer1 / (spsi->iov_base)->s_inodes_per_group);
 
@@ -280,16 +280,16 @@ int headway(struct iovec* spsi, struct iovec* speaker_group,
 	
   //int ret = preadv(img, str_iovec1, 1, offset1);
   int checker2 =  preadv(img, srteuct_iovec, 1, offset1);
-  /*
+  */
   if (rgd1(img, prevoius_node, spsi->iov_base,
                        speaker_group) < 0 ||
       node_reader(img, prevoius_node, spsi->iov_base,
                  speaker_group->iov_base, srteuct_iovec) < 0 ||
       transponse_data(img, inode->iov_base, file) < 0)
-      */
-  if (checker1< 0 ||
+      
+  /*if (checker1< 0 ||
       checker2 < 0 ||
-      transponse_data(img, srteuct_iovec->iov_base, data_container) < 0)
+      transponse_data(img, srteuct_iovec->iov_base, data_container) < 0)*/
   {
 	  return errno;
   }
@@ -331,7 +331,7 @@ size_t take_way(char* destination, const char* way_cnst)
 int dump_file(int img, const char* way_const, int returner) 
 {
   struct iovec* s1 = ci(sizeof(struct ext2_super_block));
-  int checker = preadv(img, sb, 1, 1024);
+  int checker = preadv(img, s1, 1, 1024);
  struct iovec* s3 = ci(sizeof(struct ext2_inode));
   if (checker < 0) {
   //if (read_superblock(img, super_block) < 0) {
@@ -350,7 +350,7 @@ int dump_file(int img, const char* way_const, int returner)
 
   if (way_const[0] == '/')
   {
-	  ++path;
+	  ++way_const;
   }
   char file_name[512];
 	
@@ -375,7 +375,7 @@ int dump_file(int img, const char* way_const, int returner)
       revilaion(s1, s2, s3, data_container);
       return -ENOTDIR;
     }
-    name_len = take_way(file_name, way_const);
+    lght = take_way(file_name, way_const);
   }
 
   strcpy(data_container->naimenovanie, file_name);
