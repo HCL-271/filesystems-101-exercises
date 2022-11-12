@@ -33,7 +33,7 @@ struct iovec* ci(size_t length) {
 struct file_type {
   int matrix;
   int inode_nr;
-  char naimenovanie[512];
+  char naimenovanie[256];
   int file_type1;
   int returner;
 };
@@ -73,7 +73,7 @@ int path_finder(int fd, int i_num, char* cahr, const struct ext2_super_block* sb
 }
 */
 void return_vvod(struct iovec* free_space, struct file_type* file_type2) {
-  char naimenovanie[512];
+  char naimenovanie[256];
   struct ext2_dir_entry_2* ext2_dir_entry_21;
   for (size_t i = 0; i < free_space->iov_len; i += ext2_dir_entry_21->rec_len) 
   {
@@ -91,8 +91,8 @@ void return_vvod(struct iovec* free_space, struct file_type* file_type2) {
 
 
 int buffer_checker(int img, off_t offset1, struct iovec* iovec_mod, struct file_type* data_stuff) {
-  //size_t reading_prob = (urb < bs) ? urb : bs;
-  iovec_mod->iov_len = (urb < bs) ? urb : bs;
+  size_t reading_prob = (urb < bs) ? urb : bs;
+  iovec_mod->iov_len = reading_prob;
   int read_bytes = preadv(img, iovec_mod, 1, offset1);
   if (read_bytes < 0) 
   {
@@ -137,29 +137,29 @@ int rdb(int img, struct ext2_inode* ext2_inode1, struct file_type* data_conteine
     }
   }
   cler_i(memory);
-	struct iovec* memory1 = ci(bs);	
-cler_i(memory1);
+	/*struct iovec* memory1 = ci(bs);	
+cler_i(memory1);*/
   return 0;
 }
 
 int rib(int img, uint32_t find_position, struct file_type* data_conteiner) {
   struct iovec* inside = ci(bs);
-struct iovec* outside = ci(bs);	
+//struct iovec* outside = ci(bs);	
 	int chck1= preadv(img, inside, 1, find_position);
   if (chck1 < 0) 
   {
     cler_i(inside);
     return errno;
   }
-	 if (chck1 < 0)
+	/* if (chck1 < 0)
 	 {
     cler_i(outside);
     return errno;
-  }
-  struct iovec* data_cont = ci(bs);	
+  }*/
+  	
   uint32_t* stuff_place = inside->iov_base;
 
-
+struct iovec* data_cont = ci(bs);
   for (size_t i = 0; i < bs / 4 && stuff_place[i] != 0; ++i) 
   {	
 	  int chck = buffer_checker(img, stuff_place[i] * bs, data_cont, data_conteiner);
@@ -177,7 +177,7 @@ struct iovec* outside = ci(bs);
 
   cler_i(data_cont);
   cler_i(inside);
-	cler_i(outside);
+	//cler_i(outside);
   return 0;
 }
 
@@ -212,9 +212,9 @@ int handle_indir_block(int img, uint32_t distant_place,
 
 int transponse_data(int img, struct ext2_inode* ext2_inode1, struct file_type* data_container) {
   urb = ext2_inode1->i_size;
-	size_t urb1 = ext2_inode1->i_size;
+	//size_t urb1 = ext2_inode1->i_size;
   if (rdb(img, ext2_inode1, data_container) < 0) {
-	urb1++;
+	//urb1++;
 	  return errno;
   }
   int zero1 = rib(img, ext2_inode1->i_block[12] * bs,
@@ -222,12 +222,11 @@ int transponse_data(int img, struct ext2_inode* ext2_inode1, struct file_type* d
   if (zero1 < 0)
   { return errno;}
 
-	int zero2 = handle_indir_block(
-          img, ext2_inode1->i_block[12 + 1] * bs, data_container);
+	int zero2 = handle_indir_block(img, ext2_inode1->i_block[12 + 1] * bs, data_container);
 if (zero2 < 0)
   { 
 	  return errno;
-		urb1++;
+		//urb1++;
   }
   return 0;
 }
@@ -237,25 +236,26 @@ if (zero2 < 0)
 
 
 int node_reader(int img, int before_pos, struct ext2_super_block* ext2_super_block1,
-               struct ext2_group_desc* ext2_group_desc1, struct iovec* str_iovec1) {
+               struct ext2_group_desc* ext2_group_desc1, struct iovec* str_iovec1) 
+{
   size_t inode_pos1 = before_pos % ext2_super_block1->s_inodes_per_group;
 
   off_t offset =
       ext2_group_desc1->bg_inode_table * bs + ext2_super_block1->s_inode_size * inode_pos1;
 	
-  int ret = preadv(img, str_iovec1, 1, offset);
-  return ret;
+ // int ret = preadv(img, str_iovec1, 1, offset);
+  return preadv(img, str_iovec1, 1, offset);
 }
 int rgd1(int img, int integer1, struct ext2_super_block* ext2_super_block1,
                      struct iovec* descrptn) {
- size_t aaray_size = 1024 << ext2_super_block1->s_log_block_size;
-size_t	aaray_size1 = 1024 << ext2_super_block1->s_log_block_size;
+ bs = 1024 << ext2_super_block1->s_log_block_size;
+//size_t	aaray_size1 = 1024 << ext2_super_block1->s_log_block_size;
 
   size_t element_poas = descrptn->iov_len * (integer1 / ext2_super_block1->s_inodes_per_group);
 
-  off_t offset1 = aaray_size + element_poas + ext2_super_block1->s_first_data_block * aaray_size1;
-  int ret = preadv(img, descrptn, 1, offset1);
-  return ret;
+  off_t offset1 = bs + element_poas + ext2_super_block1->s_first_data_block * bs;
+ // int ret = preadv(img, descrptn, 1, offset1);
+  return preadv(img, descrptn, 1, offset1);
 }
 
 int headway(struct iovec* spsi, struct iovec* speaker_group,
@@ -285,12 +285,7 @@ size_t	aaray_size1 = 1024 << (spsi->iov_base)->s_log_block_size;
                        speaker_group) < 0 ||
       node_reader(img, prevoius_node, spsi->iov_base,
                  speaker_group->iov_base, srteuct_iovec) < 0 ||
-      transponse_data(img, srteuct_iovec->iov_base, data_container) < 0)
-      
-  /*if (checker1< 0 ||
-      checker2 < 0 ||
-      transponse_data(img, srteuct_iovec->iov_base, data_container) < 0)*/
-  {
+      transponse_data(img, srteuct_iovec->iov_base, data_container) < 0){
 	  return errno;
   }
 
@@ -352,7 +347,7 @@ int dump_file(int img, const char* way_const, int returner)
   {
 	  ++way_const;
   }
-  char file_name[512];
+  char file_name[256];
 	
   size_t lght = take_way(file_name, way_const);
 	
