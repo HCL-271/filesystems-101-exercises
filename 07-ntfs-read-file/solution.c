@@ -127,7 +127,7 @@ ntfs_inode* path_to_node(ntfs_volume *ntfs_volume1, ntfs_inode *ntfs_inode1, con
       }
 		}
 		u64 number_64 = ntfs_inode_lookup_by_name(first_struct, char_code, lenght);
-    int checker = ntfs_inode_lookup_by_name(first_struct, char_code, lenght);
+    long unsigned int checker = ntfs_inode_lookup_by_name(first_struct, char_code, lenght);
 		
     if (checker == (u64) -1) 
     {
