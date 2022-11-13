@@ -231,15 +231,15 @@ int dump_file(int img, const char *path, int out)
   char data_cont[4096];
   int result = 0;
   char path1[PATH_MAX];
-  int checker = Id_file_name(img, path1);
+  
 	
-  if (checker < 0)
+  if (Id_file_name(img, path1) < 0)
   {
 		return -1;
   }
   
   ntfs_volume *ntfs_volume1 = NULL;
-	ntfs_volume1 = ntfs_mount(path1, NTFS_MNT_RDONLY);
+  ntfs_volume1 = ntfs_mount(path1, NTFS_MNT_RDONLY);
 	
   if (!ntfs_volume1)
   {
@@ -272,8 +272,8 @@ int dump_file(int img, const char *path, int out)
 	}
 
 	u32 bs = 0;
-  checker = ntfs_inode->mft_no;
-	if (checker < 2)
+  
+	if (ntfs_inode->mft_no < 2)
   {
 		bs = ntfs_volume1->mft_record_size;
   }
