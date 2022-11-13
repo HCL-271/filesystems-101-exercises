@@ -60,11 +60,11 @@ ntfs_inode* path_to_node(ntfs_volume *ntfs_volume1, ntfs_inode *ntfs_inode1, con
   char *tuple;
 	tuple = ntfs3gdir;
   
-	int chck = tuple && *tuple && *tuple;
+	
 	while (tuple && *tuple && *tuple == PATH_SEP)
   {
     tuple++;
-    chck = tuple && *tuple && *tuple;
+    
   }
   
 if (ntfs_inode1) 
