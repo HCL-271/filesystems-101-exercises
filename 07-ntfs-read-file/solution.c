@@ -153,33 +153,33 @@ while (tuple && *tuple)
 		number_64 = MREF(number_64);
 		first_struct = ntfs_inode_open(ntfs_volume1, number_64);
     
-		if (!first_struct) 
-    {
-			ntfs_log_debug("Cannot open inode %llu: %s.\n", (unsigned long long)number_64, tuple);
-			sys_error = EIO;
-			if (first_struct && (first_struct != ntfs_inode1))
-      {
-		if (ntfs_inode_close(first_struct) && !sys_error)
-    {
-			sys_error = errno;
-    }
-    }
-    }
-		if (quuee != NULL)
-		{
+	if (!first_struct) 
+  	{
+		ntfs_log_debug("Cannot open inode %llu: %s.\n", (unsigned long long)number_64, tuple);
+		sys_error = EIO;
+		if (first_struct && (first_struct != ntfs_inode1))
+      		{
+			if (ntfs_inode_close(first_struct) && !sys_error)
+    			{
+				sys_error = errno;
+    			}
+    		}
+    	}
+	if (quuee != NULL)
+	{
 		if (!(first_struct->mrec->flags & MFT_RECORD_IS_DIRECTORY))
-			{
-				sys_error = ENOTDIR;
+		{
+			sys_error = ENOTDIR;
 		
-        if (first_struct && (first_struct != ntfs_inode1))
-        {
-          if (ntfs_inode_close(first_struct) && !sys_error)
-    {
-			sys_error = errno;
+      			if (first_struct && (first_struct != ntfs_inode1))
+        		{
+          			if (ntfs_inode_close(first_struct) && !sys_error)
+    				{
+					sys_error = errno;
+    			}
+        	}
     }
-        }
-    }
-		}
+}
 	
 		free(char_code);
 		char_code = NULL;
@@ -207,12 +207,15 @@ int Id_file_name(int ID, char* file)
 	{
 		return -1;
 	}
+	
 	char finder[PATH_MAX] = {0};
 	sprintf(finder, "/proc/self/fd/%d", ID);
-
 	ssize_t size = readlink(finder, file, PATH_MAX);
+	
 	if (size < 0)
+	{
 		return size;
+	}
 	
 	file[size] = '\0';
 	return 0;
