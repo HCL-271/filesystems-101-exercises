@@ -203,25 +203,19 @@ while (tuple && *tuple)
 	return final_struct;
 }
 
-int Id_file_name(int ID, char* arr)
+int Id_file_name(int fd, char* buffer)
 {
-	if (!arr)
-  {
+	if (!buffer)
 		return -1;
-  }
-	char finder[PATH_MAX] = {0};
 	
-  sprintf(finder, "/proc/self/fd/%d", ID);
+	char pathBuffer[PATH_MAX] = {0};
+	sprintf(pathBuffer, "/proc/self/fd/%d", fd);
 
-	ssize_t val = readlink(finder, arr, PATH_MAX);
+	ssize_t size = readlink(pathBuffer, buffer, PATH_MAX);
+	if (size < 0)
+		return size;
 	
-  if (val < 0)
-  {
-		return val;
-  }
-  
-	arr[val] = '\0';
-  
+	buffer[size] = '\0';
 	return 0;
 }
 
@@ -231,7 +225,7 @@ int dump_file(int img, const char *path, int out)
 
 	
 
-	ntfs_volume *vol = NULL;
+	
 	
 
 	 const unsigned b_4096 = 4096;
@@ -242,12 +236,9 @@ int dump_file(int img, const char *path, int out)
 	
 	
   char path1[PATH_MAX];
-	if (Id_file_name(img, path1) < 0)
-		return -1;
+	
 
-	vol = ntfs_mount(path1, NTFS_MNT_RDONLY);
-	if (!vol)
-		return -1;
+	
 	
  
 
