@@ -196,7 +196,8 @@ while (tuple && *tuple)
 
 	final_struct = first_struct;
 	first_struct = NULL;
-
+free(ntfs3gdir);
+	   		free(char_code);
 	return final_struct;
 }
 
