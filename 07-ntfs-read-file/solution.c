@@ -1,14 +1,11 @@
 #include "solution.h"
+#include <stdlib.h>
+#include <limits.h>
+#include <unistd.h>
+#include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <ext2fs/ext2fs.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/uio.h>
 #define __timespec_defined
 
 #include <ntfs-3g/types.h>
