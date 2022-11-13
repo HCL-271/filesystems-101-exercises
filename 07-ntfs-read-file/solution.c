@@ -40,17 +40,17 @@ ntfs_inode* path_to_node(ntfs_volume *ntfs_volume1, ntfs_inode *ntfs_inode1, con
 	ntfs_inode *final_struct = NULL;
 	ntfs3gdir = strdup(way);
   
-  int sys_error = ENOMEM;
+  int sys_error = 0;
   
 	if (!ntfs3gdir) 
-  {
+  	{
 		ntfs_log_error("Out of memory.\n");
 		sys_error = ENOMEM;
 			free(ntfs3gdir);
       free(char_code);
   
       sys_error = 0;  
-	    if (sys_error)
+	if (sys_error)
       {
 		      errno = sys_error;
       }
@@ -61,100 +61,96 @@ ntfs_inode* path_to_node(ntfs_volume *ntfs_volume1, ntfs_inode *ntfs_inode1, con
 	tuple = ntfs3gdir;
   
 	int chck = tuple && *tuple && *tuple;
-	while (chck == PATH_SEP)
+	while (tuple && *tuple && *tuple == PATH_SEP)
   {
     tuple++;
     chck = tuple && *tuple && *tuple;
   }
   
-	if (ntfs_inode1) 
-  {
-		first_struct = ntfs_inode1;
-	} else 
-  {
-    first_struct = ntfs_inode_open(ntfs_volume1, FILE_root);
-    
-		if (!first_struct) 
-    {
-			ntfs_log_debug("Couldn't open the inode of the root "
+if (ntfs_inode1) 
+{
+	first_struct = ntfs_inode1;
+} else {
+    	first_struct = ntfs_inode_open(ntfs_volume1, FILE_root);
+    	if (!first_struct) 
+    	{
+		ntfs_log_debug("Couldn't open the inode of the root "
                      "directory.\n");
-      //
-			sys_error = EIO;
+      			sys_error = EIO;
 			final_struct = (ntfs_inode*)NULL;
 			free(ntfs3gdir);
-	    free(char_code);
-	if (sys_error)
-  {
-    errno = sys_error;
-  }
-    return final_struct;
+	   		free(char_code);
+			if (sys_error)
+			{
+    				errno = sys_error;
+  			}
+    			return final_struct;
 	}
-	}
-  char *quuee;
-	int lenght = 0;
-	while (tuple && *tuple) {
-		
-		quuee = strchr(tuple, PATH_SEP);
-		
-    if (quuee != NULL) 
-    {
-			*quuee = '\0';
-		}
-		lenght = ntfs_mbstoucs(tuple, &char_code);
-    
-		if (lenght < 0) 
-    {
-			ntfs_log_perror("Could not convert filename to Unicode:"
-					" '%s'", tuple);
-			sys_error = errno;
-			if (first_struct && (first_struct != ntfs_inode1))
-      {
-		if (ntfs_inode_close(first_struct) && !sys_error)
-    {
-			sys_error = errno;
-    }
-      }
-		} else 
-      if (lenght > NTFS_MAX_NAME_LEN) 
-      {
-			sys_error = ENAMETOOLONG;
-			if (first_struct && (first_struct != ntfs_inode1))
-      {
-		if (ntfs_inode_close(first_struct) && !sys_error)
-    {
-			sys_error = errno;
-    }
-      }
-		}
-		u64 number_64 = ntfs_inode_lookup_by_name(first_struct, char_code, lenght);
-    long unsigned int checker = ntfs_inode_lookup_by_name(first_struct, char_code, lenght);
-		
-    if (checker == (u64) -1) 
-    {
-			ntfs_log_debug("Couldn't find name '%s' in way "
-					"'%s'.\n", tuple, way);
-			sys_error = ENOENT;
-			if (first_struct && (first_struct != ntfs_inode1))
-      {
-		if (ntfs_inode_close(first_struct) && !sys_error)
-    {
-			sys_error = errno;
-    }
-      }
-    }
+}
+char *quuee;
+int lenght = 0;
 
-		if (first_struct != ntfs_inode1)
-    {
-			if (ntfs_inode_close(first_struct)) 
-      {
+while (tuple && *tuple) 
+{
+	quuee = strchr(tuple, PATH_SEP);
+	if (quuee != NULL) 
+    	{
+		*quuee = '\0';
+	}
+	lenght = ntfs_mbstoucs(tuple, &char_code);
+    
+	if (lenght < 0) 
+    	{
+		ntfs_log_perror("Could not convert filename to Unicode:"
+					" '%s'", tuple);
+		sys_error = errno;
+		if (first_struct && (first_struct != ntfs_inode1))
+      		{
+			if (ntfs_inode_close(first_struct) && !sys_error)
+    			{
 				sys_error = errno;
-					free(ntfs3gdir);
-	free(char_code);
-	if (sys_error)
-  {
-		errno = sys_error;
-  }
-	return final_struct;
+   			}
+      		}
+	} else if (lenght > NTFS_MAX_NAME_LEN) 
+      	{
+		sys_error = ENAMETOOLONG;
+		if (first_struct && (first_struct != ntfs_inode1))
+      		{
+			if (ntfs_inode_close(first_struct) && !sys_error)
+    			{
+				sys_error = errno;
+    			}
+      		}
+	}
+	u64 number_64 = ntfs_inode_lookup_by_name(first_struct, char_code, lenght);
+    	long unsigned int checker = ntfs_inode_lookup_by_name(first_struct, char_code, lenght);
+		
+    	if (checker == (u64) -1) 
+    	{
+		ntfs_log_debug("Couldn't find name '%s' in way "
+					"'%s'.\n", tuple, way);
+		sys_error = ENOENT;
+		if (first_struct && (first_struct != ntfs_inode1))
+      		{
+			if (ntfs_inode_close(first_struct) && !sys_error)
+    			{
+				sys_error = errno;
+    			}
+      		}
+   	}
+
+	if (first_struct != ntfs_inode1)
+    	{
+		if (ntfs_inode_close(first_struct)) 
+      		{
+			sys_error = errno;
+			free(ntfs3gdir);
+			free(char_code);
+			if (sys_error)
+  			{
+				errno = sys_error;
+  			}
+		return final_struct;
 	}
     }
 
@@ -175,8 +171,7 @@ ntfs_inode* path_to_node(ntfs_volume *ntfs_volume1, ntfs_inode *ntfs_inode1, con
     }
 		if (quuee != NULL)
 		{
-		
-			if (!(first_struct->mrec->flags & MFT_RECORD_IS_DIRECTORY))
+		if (!(first_struct->mrec->flags & MFT_RECORD_IS_DIRECTORY))
 			{
 				sys_error = ENOTDIR;
 		
