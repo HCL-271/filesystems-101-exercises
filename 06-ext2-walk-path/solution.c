@@ -104,7 +104,7 @@ int rdb(int img, struct ext2_inode* ext2_inode1, struct file_type* data_conteine
   }
   cler_i(memory);
 	
-cler_i(memory1);*/
+
   return 0;
 }
 
