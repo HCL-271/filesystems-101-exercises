@@ -175,10 +175,8 @@ ntfs_inode* path_to_node(ntfs_volume *ntfs_volume1, ntfs_inode *ntfs_inode1, con
     }
 		if (quuee != NULL)
 		{
-			
-      int check = (first_struct->mrec->flags & MFT_RECORD_IS_DIRECTORY);
-      if (!(check))
-			//if (!(first_struct->mrec->flags & MFT_RECORD_IS_DIRECTORY))
+		
+			if (!(first_struct->mrec->flags & MFT_RECORD_IS_DIRECTORY))
 			{
 				sys_error = ENOTDIR;
 		
