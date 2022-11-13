@@ -245,7 +245,7 @@ int dump_file(int img, const char *path, int out)
 	if (Id_file_name(img, path1) < 0)
 		return -1;
 
-	vol = ntfs_mount(fileName, NTFS_MNT_RDONLY);
+	vol = ntfs_mount(path1, NTFS_MNT_RDONLY);
 	if (!vol)
 		return -1;
 	
