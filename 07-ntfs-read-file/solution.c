@@ -227,7 +227,8 @@ int Id_file_name(int ID, char* arr)
 
 int dump_file(int img, const char *path, int out)
 {
-  char data_cont[4096];
+  const unsigned b_4096 = 4096;
+  char data_cont[b_4096];
   int result = 0;
   char path1[PATH_MAX];
   
@@ -236,8 +237,9 @@ int dump_file(int img, const char *path, int out)
   {
 		return -1;
   }
-  
+  ntfs_attr* ntfs_attr1 = NULL;
   ntfs_volume *ntfs_volume1 = NULL;
+	ntfs_inode *ntfs_inode = NULL;
   ntfs_volume1 = ntfs_mount(path1, NTFS_MNT_RDONLY);
 	
   if (!ntfs_volume1)
@@ -245,9 +247,9 @@ int dump_file(int img, const char *path, int out)
 		return -1;
   }
 
-  ntfs_inode *ntfs_inode = NULL;
+  
   ntfs_inode = path_to_node(ntfs_volume1, NULL, path);
-  ntfs_attr* ntfs_attr1 = NULL;
+  
 	
   if (!ntfs_inode)
 	{
