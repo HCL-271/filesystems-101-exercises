@@ -37,41 +37,7 @@ struct file_type {
   int file_type1;
   int returner;
 };
-/*
-int path_finder(int fd, int i_num, char* cahr, const struct ext2_super_block* sb)
-{
-	struct ext2_inode inode = {};
-	size_t block_size = 1024 << sb->s_log_block_size;
-	struct ext2_group_desc gggdd = {};
-  bs = 1024 << sb->s_log_block_size;
 
-  size_t bpbpbp = descr->iov_len * (inode_nr / sb->s_inodes_per_group);
-
-  off_t bpbpaaabp = bs + bpbpbp + sb->s_first_data_block * bs;
-	if ((i_num == 2) && ((inode.i_mode & LINUX_S_IFDIR) == 0))
-		return -ENOTDIR;
-	off_t gg = SUPERBLOCK_OFFSET + sizeof(*sb) + (i_num - 1) / sb->gggdd * sizeof(group_desc);
-	pread(fd, &group_desc, sizeof(group_desc), gd_offset);
-
-	pread(fd, &inode, sizeof(inode), block_size * bpbpbp.bg_inode_table + (inode_number - 1) % sb->block_size * sb->block_size);
-
-	if ((i_num == 2) && ((gggdd.i_mode & LINUX_S_IFDIR) == 0))
-		return -ENOTDIR;
-	char* ppth = strchr(path, '/');
-	if (next_path != NULL)
-	{
-		if ((gggdd.i_mode & LINUX_S_IFDIR) == 0)
-			return -ENOTDIR;
-		*(ppth++) = '\0';
-		int run = gipb(fd, gg, block_size, &inode);
-		if (run < 0)
-			return -ENOTDIR;
-		return gipb(fd, ppth, cahr, sb);
-	}
-	else
-		return get_inode(fd, path, block_size, &inode);
-}
-*/
 void return_vvod(struct iovec* free_space, struct file_type* file_type2) {
   char naimenovanie[256];
   struct ext2_dir_entry_2* ext2_dir_entry_21;
@@ -137,26 +103,21 @@ int rdb(int img, struct ext2_inode* ext2_inode1, struct file_type* data_conteine
     }
   }
   cler_i(memory);
-	/*struct iovec* memory1 = ci(bs);	
+	
 cler_i(memory1);*/
   return 0;
 }
 
 int rib(int img, uint32_t find_position, struct file_type* data_conteiner) {
   struct iovec* inside = ci(bs);
-//struct iovec* outside = ci(bs);	
+	
 	int chck1= preadv(img, inside, 1, find_position);
   if (chck1 < 0) 
   {
     cler_i(inside);
     return errno;
   }
-	/* if (chck1 < 0)
-	 {
-    cler_i(outside);
-    return errno;
-  }*/
-  	
+
   uint32_t* stuff_place = inside->iov_base;
 
 struct iovec* data_cont = ci(bs);
@@ -249,7 +210,7 @@ int node_reader(int img, int before_pos, struct ext2_super_block* ext2_super_blo
 int rgd1(int img, int integer1, struct ext2_super_block* ext2_super_block1,
                      struct iovec* descrptn) {
  bs = 1024 << ext2_super_block1->s_log_block_size;
-//size_t	aaray_size1 = 1024 << ext2_super_block1->s_log_block_size;
+
 
   size_t element_poas = descrptn->iov_len * (integer1 / ext2_super_block1->s_inodes_per_group);
 
@@ -262,25 +223,7 @@ int headway(struct iovec* spsi, struct iovec* speaker_group,
              struct iovec* srteuct_iovec, struct file_type* data_container, int img) {
   int prevoius_node = data_container->inode_nr;
   data_container->inode_nr = -1;
-  /*
-size_t   aaray_size = 1024 << (spsi->iov_base)->s_log_block_size;
-size_t	aaray_size1 = 1024 << (spsi->iov_base)->s_log_block_size;
 
-  size_t element_poas = speaker_group->iov_len * (integer1 / (spsi->iov_base)->s_inodes_per_group);
-
-  off_t offset1 = aaray_size + element_poas + (spsi->iov_base)->s_first_data_block * aaray_size1;
-  //int ret = preadv(img, group_descriptor, 1, offset1);
-   int checker1 = preadv(img, speaker_group, 1, offset1);
-	
-	
-    size_t inode_pos1 = prevoius_node % (spsi->iov_base)->s_inodes_per_group;
-
-  off_t offset1 =
-      (speaker_group->iov_base)->bg_inode_table * bs + (spsi->iov_base)->s_inode_size * inode_pos1;
-	
-  //int ret = preadv(img, str_iovec1, 1, offset1);
-  int checker2 =  preadv(img, srteuct_iovec, 1, offset1);
-  */
   if (rgd1(img, prevoius_node, spsi->iov_base,
                        speaker_group) < 0 ||
       node_reader(img, prevoius_node, spsi->iov_base,
@@ -313,16 +256,13 @@ size_t take_way(char* destination, const char* way_cnst)
 }
 
 
-/*int read_superblock(int img, struct iovec* sb) {
-  return preadv(img, sb, 1, 1024);
-}*/
 int dump_file(int img, const char* way_const, int returner) 
 {
   struct iovec* s1 = ci(sizeof(struct ext2_super_block));
   int checker = preadv(img, s1, 1, 1024);
  struct iovec* s3 = ci(sizeof(struct ext2_inode));
   if (checker < 0) {
-  //if (read_superblock(img, super_block) < 0) {
+
     cler_i(s1);
     return errno;
   }
