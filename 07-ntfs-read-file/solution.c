@@ -10,30 +10,29 @@
 #include <sys/types.h>
 #include <sys/uio.h>
 #define __timespec_defined
-#include <ntfs-3g/volume.h>
-#include <ntfs-3g/dir.h>
+
 #include <ntfs-3g/types.h>
 #include <ntfs-3g/attrib.h>
+#include <ntfs-3g/volume.h>
+#include <ntfs-3g/dir.h>
 
 ntfs_inode* path_to_node(ntfs_volume *ntfs_volume1, ntfs_inode *ntfs_inode1, const char *way)
 {
-	//u64 inum;
 
-  //int err = 0;
 
 	ntfs_inode *first_struct;
 	
 	
   
 	char *ntfs3gdir = NULL;
-/*
+
 	if (!ntfs_volume1 || !way) 
   {
   
 		errno = EINVAL;
 		return NULL;
     
-	}*/
+	}
   
 	ntfschar *char_code = NULL;
 	ntfs_log_trace("path: '%s'\n", way);
