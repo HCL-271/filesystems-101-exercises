@@ -127,7 +127,7 @@ ntfs_inode* path_to_node(ntfs_volume *ntfs_volume1, ntfs_inode *ntfs_inode1, con
       }
 		}
 		u64 number_64 = ntfs_inode_lookup_by_name(first_struct, char_code, lenght);
-    int checker = ntfs_inode_lookup_by_name(first_struct, char_code, lenght)
+    int checker = ntfs_inode_lookup_by_name(first_struct, char_code, lenght);
 		
     if (checker == (u64) -1) 
     {
@@ -182,7 +182,7 @@ ntfs_inode* path_to_node(ntfs_volume *ntfs_volume1, ntfs_inode *ntfs_inode1, con
 			{
 				sys_error = ENOTDIR;
 		
-        if (first_struct && (first_structfirst_struct != ntfs_inode1))
+        if (first_struct && (first_struct != ntfs_inode1))
         {
           if (ntfs_inode_close(first_struct) && !sys_error)
     {
@@ -237,8 +237,8 @@ int dump_file(int img, const char *path, int out)
 {
   char data_cont[4096];
   int result = 0;
-  char path[PATH_MAX];
-  int checker = Id_file_name(img, path);
+  char path1[PATH_MAX];
+  int checker = Id_file_name(img, path1);
 	
   if (checker < 0)
   {
@@ -246,7 +246,7 @@ int dump_file(int img, const char *path, int out)
   }
   
   ntfs_volume *ntfs_volume1 = NULL;
-	ntfs_volume1 = ntfs_mount(path, NTFS_MNT_RDONLY);
+	ntfs_volume1 = ntfs_mount(path1, NTFS_MNT_RDONLY);
 	
   if (!ntfs_volume1)
   {
@@ -288,8 +288,8 @@ int dump_file(int img, const char *path, int out)
 	s64 ot = 0;
 	s64 bR = 0;
   s64 red = 0;
-  
-	while (true) 
+  	int True = 1;
+	while (True) 
 	{
 		if (bs > 0) 
 		{
