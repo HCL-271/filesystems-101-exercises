@@ -227,10 +227,30 @@ int Id_file_name(int ID, char* arr)
 
 int dump_file(int img, const char *path, int out)
 {
-  const unsigned b_4096 = 4096;
+	
+
+	
+
+	ntfs_volume *vol = NULL;
+	
+
+	 const unsigned b_4096 = 4096;
   char data_cont[b_4096];
-  int result = 0;
+
+	  int result = 0;
+
+	
+	
   char path1[PATH_MAX];
+	if (Id_file_name(img, path1) < 0)
+		return -1;
+
+	vol = ntfs_mount(fileName, NTFS_MNT_RDONLY);
+	if (!vol)
+		return -1;
+	
+ 
+
   
 	
   if (Id_file_name(img, path1) < 0)
