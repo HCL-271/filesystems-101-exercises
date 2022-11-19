@@ -70,18 +70,18 @@ static __u32 off_tab = 0;
 int copying_cur_buff(int img, int out, __le32 block_nr)
 {
 	 __u32 array;
-	//__u32 array = bites_in_blk<size-off_tab?bites_in_blk:size-off_tab;
+	
 	if (bites_in_blk < size-off_tab)
 	{
 		 array = bites_in_blk;
 	} else{
 		array = size-off_tab;
 	}
-	//__u32 array = bites_in_blk<size-off_tab?bites_in_blk:size-off_tab;
+
 	if(array == 0){
 		return 0;
 	}
-	//__u32 array = bites_in_blk<size-off_tab?bites_in_blk:size-off_tab;
+
 	if(array == 0)
 	{
 		return 0;
@@ -108,15 +108,28 @@ int copying_cur_buff(int img, int out, __le32 block_nr)
 	return 0;
 }
 
-int copy_si_buffer_size(int img, int out, __le32 block_nr){
+int copy_si_buffer_size(int img, int out, __le32 block_nr)
+{
 	__u32 off_tab = bites_in_blk * block_nr;
+	
 	int array = pread(img, si_buffer_size, bites_in_blk, off_tab);
-	if(array < (int)bites_in_blk)
+	if(pread(img, si_buffer_size, bites_in_blk, off_tab) < (int)bites_in_blk)
 	{
 		return -errno;
 	}
-	for(__u32 i=0; i < (__u32)(bites_in_blk / sizeof(__le32)); i++){
-		int next = (block_nr!=0?si_buffer_size[i]:0);
+	
+	for(__u32 i=0; i < (__u32)(bites_in_blk / sizeof(__le32)); i++)
+	{
+		//int next = (block_nr!=0?si_buffer_size[i]:0);
+		int next;
+		if(block_nr != 0)
+		{
+			next = si_buffer_size[i];
+		}
+		else
+		{
+			next = 0;
+		}
 		int back = copying_cur_buff(img, out, next);
 		if(back < 0){
 			return back;
@@ -125,8 +138,10 @@ int copy_si_buffer_size(int img, int out, __le32 block_nr){
 	return 0;
 }
 
-int copy_di_buffer_size(int img, int out, __le32 block_nr){
+int copy_di_buffer_size(int img, int out, __le32 block_nr)
+{
 	__u32 off_tab = bites_in_blk * block_nr;
+	
 	int array = pread(img, di_buffer_size, bites_in_blk, off_tab);
 	if(array < (int)bites_in_blk)
 	{
