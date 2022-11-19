@@ -16,7 +16,23 @@ size_t urb = 0;
 
 size_t bs = 0;
 
-
+__attribute__((destructor)) void free_all(void)
+{
+	
+	if (buffer_size != NULL)
+	{
+		free(buffer_size);
+	}
+	
+	if(si_buffer_size != NULL)
+	{
+		free(si_buffer_size);
+	}
+	if(di_buffer_size != NULL)
+	{
+		free(di_buffer_size);		
+	}
+}
 
 struct iovec* ci(size_t length) {
   struct iovec* iov = malloc(sizeof(struct iovec));
@@ -53,8 +69,8 @@ static __u32 size;
 static __u32 off_tab = 0;
 int copying_cur_buff(int img, int out, __le32 block_nr)
 {
-	 
-	__u32 array = bites_in_blk<size-off_tab?bites_in_blk:size-off_tab;
+	 __u32 array;
+	//__u32 array = bites_in_blk<size-off_tab?bites_in_blk:size-off_tab;
 	if (bites_in_blk < size-off_tab)
 	{
 		 array = bites_in_blk;
@@ -76,8 +92,8 @@ int copying_cur_buff(int img, int out, __le32 block_nr)
 		memset(buffer_size, 0, bites_in_blk);
 	}
 	else{
-		//__u32 check = pread(img, buffer_size, array, bites_in_blk * block_nr);
-		if(pread(img, buffer_size, array, bites_in_blk * block_nr) != array)
+		__u32 check = pread(img, buffer_size, array, bites_in_blk * block_nr);
+		if(check != array)
 		{
 			return -errno;
 		}
