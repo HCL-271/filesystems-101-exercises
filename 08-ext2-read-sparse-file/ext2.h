@@ -175,3 +175,48 @@ struct ext2_inode {
 #define	EXT2_VALID_FS			0x0001	/* Unmounted cleanly */
 #define	EXT2_ERROR_FS			0x0002	/* Errors detected */
 #define	EFSCORRUPTED			EUCLEAN	/* Filesystem is corrupted */
+/*
+ * Mount flags
+ */
+#define EXT2_MOUNT_OLDALLOC		0x000002  /* Don't use the new Orlov allocator */
+#define EXT2_MOUNT_GRPID		0x000004  /* Create files with directory's group */
+#define EXT2_MOUNT_DEBUG		0x000008  /* Some debugging messages */
+#define EXT2_MOUNT_ERRORS_CONT		0x000010  /* Continue on errors */
+#define EXT2_MOUNT_ERRORS_RO		0x000020  /* Remount fs ro on errors */
+#define EXT2_MOUNT_ERRORS_PANIC		0x000040  /* Panic on errors */
+#define EXT2_MOUNT_MINIX_DF		0x000080  /* Mimics the Minix statfs */
+#define EXT2_MOUNT_NOBH			0x000100  /* No buffer_heads */
+#define EXT2_MOUNT_NO_UID32		0x000200  /* Disable 32-bit UIDs */
+#define EXT2_MOUNT_XATTR_USER		0x004000  /* Extended user attributes */
+#define EXT2_MOUNT_POSIX_ACL		0x008000  /* POSIX Access Control Lists */
+#define EXT2_MOUNT_XIP			0x010000  /* Obsolete, use DAX */
+#define EXT2_MOUNT_USRQUOTA		0x020000  /* user quota */
+#define EXT2_MOUNT_GRPQUOTA		0x040000  /* group quota */
+#define EXT2_MOUNT_RESERVATION		0x080000  /* Preallocation */
+#define EXT2_MOUNT_DAX			0x100000  /* Direct Access */
+
+
+#define clear_opt(o, opt)		o &= ~EXT2_MOUNT_##opt
+#define set_opt(o, opt)			o |= EXT2_MOUNT_##opt
+#define test_opt(sb, opt)		(EXT2_SB(sb)->s_mount_opt & \
+					 EXT2_MOUNT_##opt)
+/*
+ * Maximal mount counts between two filesystem checks
+ */
+#define EXT2_DFL_MAX_MNT_COUNT		20	/* Allow 20 mounts */
+#define EXT2_DFL_CHECKINTERVAL		0	/* Don't use interval check */
+
+/*
+ * Behaviour when detecting errors
+ */
+#define EXT2_ERRORS_CONTINUE		1	/* Continue execution */
+#define EXT2_ERRORS_RO			2	/* Remount fs read-only */
+#define EXT2_ERRORS_PANIC		3	/* Panic */
+#define EXT2_ERRORS_DEFAULT		EXT2_ERRORS_CONTINUE
+struct ext2_dir_entry_2 {
+	__le32	inode;			/* Inode number */
+	__le16	rec_len;		/* Directory entry length */
+	__u8	name_len;		/* Name length */
+	__u8	file_type;
+	char	name[];			/* File name, up to EXT2_NAME_LEN */
+};
