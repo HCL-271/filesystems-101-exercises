@@ -186,29 +186,15 @@ int dump_file(int img, int inode_nr, int out)
 	
 	
 	
-	//back = copy_si_buffer_size(img, out, ext2_inode1.i_block[12]);
+	back = copy_si_buffer_size(img, out, ext2_inode1.i_block[12]);
+	
 	/*
-	int copy_di_buffer_size(int img, int out, __le32 block_nr){
-	__u32 off_tab = bites_in_blk * block_nr;
-	int array = pread(img, di_buffer_size, bites_in_blk, off_tab);
-	if(array < (int)bites_in_blk)
-	{
-		return -errno;
-	}
-	for(__u32 i=0; i < (__u32)(bites_in_blk / sizeof(__le32)); i++){
-		int next = (block_nr!=0?di_buffer_size[i]:0);
-		int back = copy_si_buffer_size(img, out, next);
-		if(back < 0){
-			return back;
-		}
-	}
-	return 0;*/
 	 __le32 block_nr = ext2_inode1.i_block[12];
 	__u32 off_tab_sim = bites_in_blk * block_nr;
 	int array1 = pread(img, di_buffer_size, bites_in_blk, off_tab_sim);
 	if(array1 < (int)bites_in_blk)
 	{
-		return -errno;
+		back = -errno;
 	}
 	for(__u32 i=0; i < (__u32)(bites_in_blk / sizeof(__le32)); i++){
 		int next = (block_nr!=0?di_buffer_size[i]:0);
@@ -220,13 +206,31 @@ int dump_file(int img, int inode_nr, int out)
 		}
 	}
 	
-	
+	*/
 	
 	if(back < 0){
 		return back;
 	}
 	di_buffer_size = (__le32*)malloc(bites_in_blk);
 	back = copy_di_buffer_size(img, out, ext2_inode1.i_block[13]);
+	/*
+	__u32 off_tab = bites_in_blk * block_nr;
+	int array = pread(img, di_buffer_size, bites_in_blk, off_tab);
+	if(array < (int)bites_in_blk)
+	{
+		back = -errno;
+	}
+	for(__u32 i=0; i < (__u32)(bites_in_blk / sizeof(__le32)); i++){
+		int next = (block_nr!=0?di_buffer_size[i]:0);
+		int back = copy_si_buffer_size(img, out, next);
+		if(back < 0){
+			break;
+		}else{
+		back = 0;
+		}
+	}
+	
+	*/
 	if(back < 0)
 	{
 		return back;
