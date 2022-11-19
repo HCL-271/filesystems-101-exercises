@@ -112,7 +112,7 @@ int copy_si_buffer_size(int img, int out, __le32 block_nr)
 {
 	__u32 off_tab = bites_in_blk * block_nr;
 	
-	int array = pread(img, si_buffer_size, bites_in_blk, off_tab);
+	//int array = pread(img, si_buffer_size, bites_in_blk, off_tab);
 	if(pread(img, si_buffer_size, bites_in_blk, off_tab) < (int)bites_in_blk)
 	{
 		return -errno;
