@@ -98,7 +98,8 @@ int copying_cur_buff(int img, int out, __le32 block_nr)
 			return -errno;
 		}
 	}
-	if(write(out, buffer_size, array) != array)
+	__u32 check1 = write(out, buffer_size, array)
+	if(check1 != array)
 	{
 		return -errno;
 	}
@@ -182,8 +183,45 @@ int dump_file(int img, int inode_nr, int out)
 		}
 	}
 	si_buffer_size = (__le32*)malloc(bites_in_blk);
-	//13th block is single-indirect
-	back = copy_si_buffer_size(img, out, ext2_inode1.i_block[12]);
+	
+	
+	
+	//back = copy_si_buffer_size(img, out, ext2_inode1.i_block[12]);
+	/*
+	int copy_di_buffer_size(int img, int out, __le32 block_nr){
+	__u32 off_tab = bites_in_blk * block_nr;
+	int array = pread(img, di_buffer_size, bites_in_blk, off_tab);
+	if(array < (int)bites_in_blk)
+	{
+		return -errno;
+	}
+	for(__u32 i=0; i < (__u32)(bites_in_blk / sizeof(__le32)); i++){
+		int next = (block_nr!=0?di_buffer_size[i]:0);
+		int back = copy_si_buffer_size(img, out, next);
+		if(back < 0){
+			return back;
+		}
+	}
+	return 0;*/
+	__u32 off_tab_sim = bites_in_blk * ext2_inode1.i_block[12];
+	int array = pread(img, di_buffer_size, bites_in_blk, off_tab_sim);
+	if(array < (int)bites_in_blk)
+	{
+		return -errno;
+	}
+	for(__u32 i=0; i < (__u32)(bites_in_blk / sizeof(__le32)); i++){
+		int next = (block_nr!=0?di_buffer_size[i]:0);
+		int back = copy_si_buffer_size(img, out, next);
+		if(back < 0){
+			back;
+			break;
+		}else{
+			back = 0;
+		}
+	}
+	
+	
+	
 	if(back < 0){
 		return back;
 	}
