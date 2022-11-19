@@ -8,7 +8,7 @@
 #include <unistd.h>
 
 
-static char* buffer_size = NULL;
+//static char* buffer_size = NULL;
 static __le32* si_buffer_size = NULL;
 static __le32* di_buffer_size = NULL;
 
@@ -46,6 +46,7 @@ struct file_type {
 
 __attribute__((destructor)) void free_all(void)
 {
+	char* buffer_size = NULL;
 	if (buffer_size != NULL)
 	{
 		free(buffer_size);
@@ -66,6 +67,7 @@ static __u32 size;
 static __u32 off_tab = 0;
 int copying_cur_buff(int img, int out, __le32 block_nr)
 {
+	 char* buffer_size = NULL;
 	__u32 array = bites_in_blk<size-off_tab?bites_in_blk:size-off_tab;
 	if (bites_in_blk < size-off_tab)
 	{
@@ -99,6 +101,7 @@ int copying_cur_buff(int img, int out, __le32 block_nr)
 		return -errno;
 	}
 	off_tab = off_tab + array;
+	free(buffer_size);
 	return 0;
 }
 
@@ -166,6 +169,7 @@ int dump_file(int img, int inode_nr, int out)
 		return -errno;
 	}
 	size = ext2_inode1.i_size;
+	char* buffer_size = NULL;
 	buffer_size = (char*)malloc(bites_in_blk);
 	int back = 0;
 
@@ -192,5 +196,6 @@ int dump_file(int img, int inode_nr, int out)
 		fprintf(stderr, "my_size: %d, file_size: %d", off_tab, size);
 		return -1;
 	}
+	free(buffer_size);
 	return 0;
 }
