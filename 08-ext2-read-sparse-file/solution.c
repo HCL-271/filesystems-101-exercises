@@ -8,9 +8,8 @@
 #include <unistd.h>
 
 
-//static char* buffer_size = NULL;
-static __le32* si_buffer_size = NULL;
-static __le32* di_buffer_size = NULL;
+static char* buffer_size = NULL;
+
 
 /*
 size_t urb = 0;
@@ -28,7 +27,10 @@ struct iovec* ci(size_t length) {
   return iov;
 }
 
-
+*/
+static __le32* si_buffer_size = NULL;
+static __le32* di_buffer_size = NULL;
+/*
 
 
 
@@ -43,10 +45,10 @@ struct file_type {
   int returner;
 };
 */
-
+/*
 __attribute__((destructor)) void free_all(void)
 {
-	char* buffer_size = NULL;
+	
 	if (buffer_size != NULL)
 	{
 		free(buffer_size);
@@ -61,7 +63,7 @@ __attribute__((destructor)) void free_all(void)
 		free(di_buffer_size);		
 	}
 }
-
+*/
 static __u32 bites_in_blk;
 static __u32 size;
 static __u32 off_tab = 0;
@@ -169,7 +171,7 @@ int dump_file(int img, int inode_nr, int out)
 		return -errno;
 	}
 	size = ext2_inode1.i_size;
-	char* buffer_size = NULL;
+	
 	buffer_size = (char*)malloc(bites_in_blk);
 	int back = 0;
 
