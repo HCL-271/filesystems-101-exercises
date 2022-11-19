@@ -103,7 +103,7 @@ int copying_cur_buff(int img, int out, __le32 block_nr)
 		return -errno;
 	}
 	off_tab = off_tab + array;
-	free(buffer_size);
+	
 	return 0;
 }
 
