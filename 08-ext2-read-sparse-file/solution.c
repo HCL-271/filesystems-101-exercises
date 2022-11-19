@@ -112,7 +112,7 @@ int copy_si_buffer_size(int img, int out, __le32 block_nr)
 {
 	__u32 off_tab = bites_in_blk * block_nr;
 	
-	//int array = pread(img, si_buffer_size, bites_in_blk, off_tab);
+	
 	if(pread(img, si_buffer_size, bites_in_blk, off_tab) < (int)bites_in_blk)
 	{
 		return -errno;
@@ -120,7 +120,7 @@ int copy_si_buffer_size(int img, int out, __le32 block_nr)
 	
 	for(__u32 i=0; i < (__u32)(bites_in_blk / sizeof(__le32)); i++)
 	{
-		//int next = (block_nr!=0?si_buffer_size[i]:0);
+		
 		int next;
 		if(block_nr != 0)
 		{
@@ -130,6 +130,7 @@ int copy_si_buffer_size(int img, int out, __le32 block_nr)
 		{
 			next = 0;
 		}
+		
 		int back = copying_cur_buff(img, out, next);
 		if(back < 0){
 			return back;
@@ -142,13 +143,21 @@ int copy_di_buffer_size(int img, int out, __le32 block_nr)
 {
 	__u32 off_tab = bites_in_blk * block_nr;
 	
-	int array = pread(img, di_buffer_size, bites_in_blk, off_tab);
-	if(array < (int)bites_in_blk)
+	
+	if(pread(img, di_buffer_size, bites_in_blk, off_tab) < (int)bites_in_blk)
 	{
 		return -errno;
 	}
-	for(__u32 i=0; i < (__u32)(bites_in_blk / sizeof(__le32)); i++){
-		int next = (block_nr!=0?di_buffer_size[i]:0);
+	for(__u32 i=0; i < (__u32)(bites_in_blk / sizeof(__le32)); i++)
+	{
+		int next;
+		if(block_nr != 0)
+		   {
+			  next =  di_buffer_size[i];
+		   }
+		   else{
+			   next = 0;
+		   }
 		int back = copy_si_buffer_size(img, out, next);
 		if(back < 0){
 			return back;
@@ -160,8 +169,7 @@ int copy_di_buffer_size(int img, int out, __le32 block_nr)
 int dump_file(int img, int inode_nr, int out)
 {
 	struct ext2_super_block  ext2_super_block1;
-	__u32 const1 = 1024; 
-	ssize_t array  = pread(img, &ext2_super_block1, sizeof(ext2_super_block1), const1);
+	ssize_t array  = pread(img, &ext2_super_block1, sizeof(ext2_super_block1), 1024);
 	if(array < 0){
 		return -errno;
 	}
