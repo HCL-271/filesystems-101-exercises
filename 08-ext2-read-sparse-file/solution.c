@@ -10,7 +10,8 @@
 
 static char* buffer_size = NULL;
 
-
+#define Magic_const1       1024
+#define Magic_const2       12
 /*
 size_t urb = 0;
 
@@ -169,18 +170,23 @@ int copy_di_buffer_size(int img, int out, __le32 block_nr)
 int dump_file(int img, int inode_nr, int out)
 {
 	struct ext2_super_block  ext2_super_block1;
-	ssize_t array  = pread(img, &ext2_super_block1, sizeof(ext2_super_block1), 1024);
-	if(array < 0){
+	ssize_t array  = pread(img, &ext2_super_block1, sizeof(ext2_super_block1), Magic_const1);
+	/*
+	if(array < 0)
+	{
 		return -errno;
 	}
+	*/
+	bites_in_blk = Magic_const1 << ext2_super_block1.s_log_block_size;
 	
-	bites_in_blk = 1024 << ext2_super_block1.s_log_block_size;
-	int block_group_nr = (inode_nr - 1) / ext2_super_block1.s_inodes_per_group;
+	int block_group_nr = (inode_nr +(-1)) / ext2_super_block1.s_inodes_per_group;
 
 	struct ext2_group_desc ext2_group_desc1;
 	__u32 off_tab1 = 0; 
+	
 	off_tab1 = bites_in_blk * (ext2_super_block1.s_first_data_block + 1) + block_group_nr * sizeof(ext2_group_desc1);
 	array  = pread(img, &ext2_group_desc1, sizeof(ext2_group_desc1), off_tab1);
+	
 	if(array < 0)
 	{
 		return -errno;
@@ -191,15 +197,18 @@ int dump_file(int img, int inode_nr, int out)
 
 	off_tab1 = bites_in_blk * ext2_group_desc1.bg_inode_table + inode_in_group * ext2_super_block1.s_inode_size;
 	array  = pread(img, &ext2_inode1, sizeof(ext2_inode1), off_tab1);
-	if(array < 0){
+	if(array < 0)
+	{
 		return -errno;
 	}
 	size = ext2_inode1.i_size;
 	
 	buffer_size = (char*)malloc(bites_in_blk);
+	
 	int back = 0;
 
-	for(int i = 0; i < 12; i++){
+	for(int i = 0; i < Magic_const2; i++)
+	{
 		back = copying_cur_buff(img, out, ext2_inode1.i_block[i]);
 		if(back < 0){
 			return back;
@@ -209,7 +218,7 @@ int dump_file(int img, int inode_nr, int out)
 	
 	
 	
-	back = copy_si_buffer_size(img, out, ext2_inode1.i_block[12]);
+	back = copy_si_buffer_size(img, out, ext2_inode1.i_block[Magic_const2]);
 	
 	/*
 	 __le32 block_nr = ext2_inode1.i_block[12];
@@ -230,12 +239,13 @@ int dump_file(int img, int inode_nr, int out)
 	}
 	
 	*/
-	
+	/*
 	if(back < 0){
 		return back;
-	}
+	}*/
 	di_buffer_size = (__le32*)malloc(bites_in_blk);
-	back = copy_di_buffer_size(img, out, ext2_inode1.i_block[13]);
+	
+	back = copy_di_buffer_size(img, out, ext2_inode1.i_block[Magic_const2 + 1]);
 	/*
 	__u32 off_tab = bites_in_blk * block_nr;
 	int array = pread(img, di_buffer_size, bites_in_blk, off_tab);
