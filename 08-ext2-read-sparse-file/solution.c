@@ -66,13 +66,9 @@ static __u32 size;
 static __u32 off_tab = 0;
 int copying_cur_buff(int img, int out, __le32 block_nr)
 {
-	__u32 array;
-	if (bites_in_blk<size-off_tab)
-	{
-		 array = bites_in_blk;
-	}else
-	{
-		 array = size-off_tab;
+	__u32 array = block_size<size-copy_offset?block_size:size-copy_offset;
+	if(array == 0){
+		return 0;
 	}
 	//__u32 array = bites_in_blk<size-off_tab?bites_in_blk:size-off_tab;
 	if(array == 0)
@@ -85,8 +81,8 @@ int copying_cur_buff(int img, int out, __le32 block_nr)
 		memset(buffer_size, 0, bites_in_blk);
 	}
 	else{
-		__u32 check = pread(img, buffer_size, array, bites_in_blk * block_nr);
-		if(check != array)
+		//__u32 check = pread(img, buffer_size, array, bites_in_blk * block_nr);
+		if(pread(img, buffer_size, array, bites_in_blk * block_nr) != array)
 		{
 			return -errno;
 		}
@@ -136,8 +132,8 @@ int copy_di_buffer_size(int img, int out, __le32 block_nr){
 int dump_file(int img, int inode_nr, int out)
 {
 	struct ext2_super_block  ext2_super_block1;
-	
-	ssize_t array  = pread(img, &ext2_super_block1, sizeof(ext2_super_block1), 1024);
+	__u32 const1 = 1024; 
+	ssize_t array  = pread(img, &ext2_super_block1, sizeof(ext2_super_block1), const1);
 	if(array < 0){
 		return -errno;
 	}
@@ -146,9 +142,9 @@ int dump_file(int img, int inode_nr, int out)
 	int block_group_nr = (inode_nr - 1) / ext2_super_block1.s_inodes_per_group;
 
 	struct ext2_group_desc ext2_group_desc1;
-	__u32 off_tab = 0; 
-	off_tab = bites_in_blk * (ext2_super_block1.s_first_data_block + 1) + block_group_nr * sizeof(ext2_group_desc1);
-	array  = pread(img, &ext2_group_desc1, sizeof(ext2_group_desc1), off_tab);
+	__u32 off_tab1 = 0; 
+	off_tab1 = bites_in_blk * (ext2_super_block1.s_first_data_block + 1) + block_group_nr * sizeof(ext2_group_desc1);
+	array  = pread(img, &ext2_group_desc1, sizeof(ext2_group_desc1), off_tab1);
 	if(array < 0)
 	{
 		return -errno;
@@ -157,8 +153,8 @@ int dump_file(int img, int inode_nr, int out)
 	struct ext2_inode ext2_inode1;
 	int inode_in_group = (inode_nr - 1) % ext2_super_block1.s_inodes_per_group;
 
-	off_tab = bites_in_blk * ext2_group_desc1.bg_inode_table + inode_in_group * ext2_super_block1.s_inode_size;
-	array  = pread(img, &ext2_inode1, sizeof(ext2_inode1), off_tab);
+	off_tab1 = bites_in_blk * ext2_group_desc1.bg_inode_table + inode_in_group * ext2_super_block1.s_inode_size;
+	array  = pread(img, &ext2_inode1, sizeof(ext2_inode1), off_tab1);
 	if(array < 0){
 		return -errno;
 	}
