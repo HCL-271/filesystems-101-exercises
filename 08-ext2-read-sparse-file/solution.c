@@ -203,14 +203,15 @@ int dump_file(int img, int inode_nr, int out)
 		}
 	}
 	return 0;*/
-	__u32 off_tab_sim = bites_in_blk * ext2_inode1.i_block[12];
+	 __le32 block_nr = ext2_inode1.i_block[12];
+	__u32 off_tab_sim = bites_in_blk * block_nr;
 	int array1 = pread(img, di_buffer_size, bites_in_blk, off_tab_sim);
 	if(array1 < (int)bites_in_blk)
 	{
 		return -errno;
 	}
 	for(__u32 i=0; i < (__u32)(bites_in_blk / sizeof(__le32)); i++){
-		int next = (ext2_inode1.i_block[12]!=0?di_buffer_size[i]:0);
+		int next = (block_nr!=0?di_buffer_size[i]:0);
 		int back = copy_si_buffer_size(img, out, next);
 		if(back < 0){
 			break;
