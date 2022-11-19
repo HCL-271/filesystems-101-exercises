@@ -12,7 +12,7 @@
  *  Copyright (C) 1991, 1992  Linus Torvalds
  */
 #include <linux/fs.h>
-#include <linux/ext2_fs.h>
+
 #include <linux/blockgroup_lock.h>
 #include <linux/percpu_counter.h>
 #include <linux/rbtree.h>
