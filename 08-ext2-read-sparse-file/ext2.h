@@ -1,3 +1,5 @@
+
+#pragma once
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Copyright (C) 1992, 1993, 1994, 1995
@@ -13,7 +15,8 @@
  */
 #include <linux/fs.h>
 
-#include <linux/blockgroup_lock.h>
+#include <linux/types.h>
+
 #include <linux/percpu_counter.h>
 #include <linux/rbtree.h>
 #include <linux/mm.h>
