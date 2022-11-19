@@ -158,34 +158,20 @@ struct ext2_inode {
 		} masix2;
 	} osd2;				/* OS dependent 2 */
 };
-struct ext2_reserve_window {
-	ext2_fsblk_t		_rsv_start;	/* First byte reserved */
-	ext2_fsblk_t		_rsv_end;	/* Last byte reserved or 0 */
-};
+#define i_size_high	i_dir_acl
 
-struct ext2_reserve_window_node {
-	struct rb_node	 	rsv_node;
-	__u32			rsv_goal_size;
-	__u32			rsv_alloc_hit;
-	struct ext2_reserve_window	rsv_window;
-};
+#define i_reserved1	osd1.linux1.l_i_reserved1
+#define i_frag		osd2.linux2.l_i_frag
+#define i_fsize		osd2.linux2.l_i_fsize
+#define i_uid_low	i_uid
+#define i_gid_low	i_gid
+#define i_uid_high	osd2.linux2.l_i_uid_high
+#define i_gid_high	osd2.linux2.l_i_gid_high
+#define i_reserved2	osd2.linux2.l_i_reserved2
 
-struct ext2_block_alloc_info {
-	/* information about reservation window */
-	struct ext2_reserve_window_node	rsv_window_node;
-	/*
-	 * was i_next_alloc_block in ext2_inode_info
-	 * is the logical (file-relative) number of the
-	 * most-recently-allocated block in this file.
-	 * We use this for detecting linearly ascending allocation requests.
-	 */
-	__u32			last_alloc_logical_block;
-	/*
-	 * Was i_next_alloc_goal in ext2_inode_info
-	 * is the *physical* companion to i_next_alloc_block.
-	 * it is the physical block number of the block which was most-recently
-	 * allocated to this file.  This gives us the goal (target) for the next
-	 * allocation when we detect linearly ascending requests.
-	 */
-	ext2_fsblk_t		last_alloc_physical_block;
-};
+/*
+ * File system states
+ */
+#define	EXT2_VALID_FS			0x0001	/* Unmounted cleanly */
+#define	EXT2_ERROR_FS			0x0002	/* Errors detected */
+#define	EFSCORRUPTED			EUCLEAN	/* Filesystem is corrupted */
