@@ -46,7 +46,23 @@ struct file_type {
 };
 */
 
-
+__attribute__((destructor)) void free_all(void)
+{
+	
+	if (buffer_size != NULL)
+	{
+		free(buffer_size);
+	}
+	
+	if(si_buffer_size != NULL)
+	{
+		free(si_buffer_size);
+	}
+	if(di_buffer_size != NULL)
+	{
+		free(di_buffer_size);		
+	}
+}
 
 static __u32 bites_in_blk;
 static __u32 size;
@@ -90,23 +106,7 @@ int copying_cur_buff(int img, int out, __le32 block_nr)
 	free(buffer_size);
 	return 0;
 }
-__attribute__((destructor)) void free_all(void)
-{
-	
-	if (buffer_size != NULL)
-	{
-		free(buffer_size);
-	}
-	
-	if(si_buffer_size != NULL)
-	{
-		free(si_buffer_size);
-	}
-	if(di_buffer_size != NULL)
-	{
-		free(di_buffer_size);		
-	}
-}
+
 int copy_si_buffer_size(int img, int out, __le32 block_nr){
 	__u32 off_tab = bites_in_blk * block_nr;
 	int array = pread(img, si_buffer_size, bites_in_blk, off_tab);
