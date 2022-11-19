@@ -17,10 +17,7 @@
 
 #include <linux/types.h>
 
-#include <linux/percpu_counter.h>
-#include <linux/rbtree.h>
-#include <linux/mm.h>
-#include <linux/highmem.h>
+
 
 /* XXX Here for now... not interested in restructing headers JUST now */
 
