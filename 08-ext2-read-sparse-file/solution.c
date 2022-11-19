@@ -85,7 +85,7 @@ int copying_cur_buff(int img, int out, __le32 block_nr)
 		memset(buffer_size, 0, bites_in_blk);
 	}
 	else{
-		int check = pread(img, buffer_size, array, bites_in_blk * block_nr);
+		__u32 check = pread(img, buffer_size, array, bites_in_blk * block_nr);
 		if(check != array)
 		{
 			return -errno;
@@ -172,7 +172,7 @@ int dump_file(int img, int inode_nr, int out)
 			return back;
 		}
 	}
-	copy_si_buffer_size = (__le32*)malloc(bites_in_blk);
+	si_buffer_size = (__le32*)malloc(bites_in_blk);
 	//13th block is single-indirect
 	back = copy_si_buffer_size(img, out, ext2_inode1.i_block[12]);
 	if(back < 0){
