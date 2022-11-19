@@ -213,7 +213,6 @@ int dump_file(int img, int inode_nr, int out)
 		int next = (ext2_inode1.i_block[12]!=0?di_buffer_size[i]:0);
 		int back = copy_si_buffer_size(img, out, next);
 		if(back < 0){
-			back;
 			break;
 		}else{
 			back = 0;
