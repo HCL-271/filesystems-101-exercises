@@ -171,12 +171,7 @@ int dump_file(int img, int inode_nr, int out)
 {
 	struct ext2_super_block  ext2_super_block1;
 	ssize_t array  = pread(img, &ext2_super_block1, sizeof(ext2_super_block1), Magic_const1);
-	/*
-	if(array < 0)
-	{
-		return -errno;
-	}
-	*/
+	
 	bites_in_blk = Magic_const1 << ext2_super_block1.s_log_block_size;
 	
 	int block_group_nr = (inode_nr +(-1)) / ext2_super_block1.s_inodes_per_group;
