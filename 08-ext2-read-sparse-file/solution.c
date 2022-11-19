@@ -66,7 +66,7 @@ static __u32 size;
 static __u32 off_tab = 0;
 int copying_cur_buff(int img, int out, __le32 block_nr)
 {
-	__u32 arrayж
+	__u32 array;
 	if (bites_in_blk<size-off_tab)
 	{
 		 array = bites_in_blk;
