@@ -46,23 +46,7 @@ struct file_type {
 };
 */
 
-__attribute__((destructor)) void free_all(void)
-{
-	
-	if (buffer_size != NULL)
-	{
-		free(buffer_size);
-	}
-	
-	if(si_buffer_size != NULL)
-	{
-		free(si_buffer_size);
-	}
-	if(di_buffer_size != NULL)
-	{
-		free(di_buffer_size);		
-	}
-}
+
 
 static __u32 bites_in_blk;
 static __u32 size;
