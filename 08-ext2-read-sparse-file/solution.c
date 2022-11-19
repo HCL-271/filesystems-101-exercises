@@ -1,11 +1,11 @@
 #include "solution.h"
 #include "ext2.h"
 #include <stdio.h>
-#include <unistd.h>
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
 #include <linux/types.h>
+#include <unistd.h>
 
 
 static char* buffer_size = NULL;
@@ -67,6 +67,13 @@ static __u32 off_tab = 0;
 int copying_cur_buff(int img, int out, __le32 block_nr)
 {
 	__u32 array = bites_in_blk<size-off_tab?bites_in_blk:size-off_tab;
+	if (bites_in_blk < size-off_tab)
+	{
+		 array = bites_in_blk;
+	} else{
+		array = size-off_tab;
+	}
+	//__u32 array = bites_in_blk<size-off_tab?bites_in_blk:size-off_tab;
 	if(array == 0){
 		return 0;
 	}
