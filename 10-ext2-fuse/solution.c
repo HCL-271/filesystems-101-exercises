@@ -56,7 +56,7 @@ static int dir_reader(long int blck_length, int highest_val, uint32_t* structs, 
 		{
 			return -ENOENT;
 		}
-		if(pread(ext2img, buf, blck_length, blck_length*structs[i]) != blck_length)
+		if(pread(img_file, buf, blck_length, blck_length*structs[i]) != blck_length)
 		{
 			return -errno;
 		}
@@ -84,46 +84,41 @@ static int dir_reader(long int blck_length, int highest_val, uint32_t* structs, 
 	return 1;
 }
 
+#define SINGLE_ARG(...) __VA_ARGS__
 
-
-#define n_parse(func, args, shander_c, inside_00, inside_01, inside_10)\
+#define NPARSE(func, args, shander_c, inside_00, inside_01, inside_10)\
 	struct ext2_inode ext2_inode1 = {};\
-	
-	int offset = make_in_off(ext2_super_block1, blck_length, inode_nr);\
-	
+	int offset = make_in_off(ext2_super_block1, blck_length, inode_number);\
 	if(offset < 0)\
 	{\
 		return offset;\
 	}\
-	if(pread(ext2img, (char*)&ext2_inode, sizeof(struct ext2_inode), offset) != sizeof(struct ext2_inode))\
+	if(pread(img_file, (char*)&ext2_inode, sizeof(struct ext2_inode), offset) != sizeof(struct ext2_inode))\
 	{\
 	return -errno;\
 	}\
-	
 	uint32_t Fist_part[blck_length/4];\
 	uint32_t second[blck_length/4];\
-	
 	int final = func(blck_length, EXT2_IND_BLOCK, ext2_inode.i_block, args);\
 	shander_c;\
 	inside_00;	\
-	if(pread(ext2img, (char*)Fist_part, blck_length, blck_length * ext2_inode.i_block[EXT2_IND_BLOCK]) != blck_length)\
+	if(pread(img_file, (char*)Fist_part, blck_length, blck_length * ext2_inode.i_block[EXT2_IND_BLOCK]) != blck_length)\
 		{\
 		return -errno;\
 	}\
 	final = func(blck_length, blck_length/4, Fist_part, args);\
 	shander_c;\
 	inside_01;\
-	if(pread(ext2img, (char*)second, blck_length, blck_length * ext2_inode.i_block[EXT2_IND_BLOCK+1]) != blck_length)\
+	if(pread(img_file, (char*)second, blck_length, blck_length * ext2_inode.i_block[EXT2_IND_BLOCK+1]) != blck_length)\
 		{\
 		return -errno;\
 	}\
 	for (int j = 0; j < blck_length/4; ++j)\
 {\
-		if(pread(ext2img, (char*)Fist_part, blck_length, blck_length * second[j]) != blck_length)\
+		if(pread(img_file, (char*)Fist_part, blck_length, blck_length * second[j]) != blck_length)\
 		{\	
-			return (-1)*errno;\
+			return -errno; \
 		}\
-		
 		final = func(blck_length, blck_length/4, Fist_part, args);	\
 		shander_c;\
 		inside_10;\
@@ -136,8 +131,8 @@ The GNU make manual says, "We split each long line into two lines using backslas
 */
 
 
-#define SINGLE_ARG(...) __VA_ARGS__
-static int Find_ino(struct ext2_super_block* ext2_super_block1, long int blck_length, int inode_number, const char* way_to_block, char cur_dir){
+
+static int inode_search(struct ext2_super_block* ext2_super_block1, long int blck_length, int inode_number, const char* way_to_block, char cur_dir){
 
 	way_to_block = way_to_block + 1;
 	
@@ -155,9 +150,9 @@ static int Find_ino(struct ext2_super_block* ext2_super_block1, long int blck_le
 	int len_en = symb_arr != NULL ? symb_arr - way_to_block : (int)strlen(way_to_block);
 
 	
-	n_parse(  dir_reader, SINGLE_ARG(way_to_block, entry_type, len_en),
+	NPARSE(  dir_reader, SINGLE_ARG(way_to_block, entry_type, len_en),
 			    {if(final <= 0){ return final;}
-				 if (final > 2) return symb_arr == NULL ? final : Find_ino(ext2_super_block1, blck_length, final, way_to_block + len_en, cur_dir);},
+				 if (final > 2) return symb_arr == NULL ? final : inode_search(ext2_super_block1, blck_length, final, way_to_block + len_en, cur_dir);},
 				{if(inode.i_block[EXT2_IND_BLOCK] == 0) 
 					return -ENOENT;},
 				{if(inode.i_block[EXT2_IND_BLOCK + 1] == 0)
@@ -174,7 +169,7 @@ static int data_torrent(long int blck_length, int highest_val, uint32_t* structs
 		if(structs[i] == 0)
 			return 0;
 
-		if(pread(ext2img, buf, blck_length, blck_length*structs[i]) != blck_length){
+		if(pread(img_file, buf, blck_length, blck_length*structs[i]) != blck_length){
 			return -errno;
 		}
 		struct ext2_dir_entry_2* ext2_dir_entry_21 = (struct ext2_dir_entry_2*) buf;
@@ -217,7 +212,7 @@ static int data_torrent(long int blck_length, int highest_val, uint32_t* structs
 
 static int directory_reader(struct ext2_super_block* ext2_super_block1, long int blck_length, int inode_number, void* file1, fuse_fill_dir_t torrent){
 
-	n_parse(  data_torrent, SINGLE_ARG(torrent, file1),
+	NPARSE(  data_torrent, SINGLE_ARG(torrent, file1),
 			    {if(res <= 0) {return res;}},
 				{if(inode.i_block[EXT2_IND_BLOCK] == 0) {return 0;}},
 				{if(inode.i_block[EXT2_IND_BLOCK + 1] == 0) return 0;},
@@ -239,7 +234,7 @@ static int readdir_hello(const char *way, void *file1, fuse_fill_dir_t torrent, 
 		return remover;
 	}
 
-	int inode_number = Find_ino(&ext2_super_block1, blck_length, EXT2_ROOT_INO, way, 1);
+	int inode_number = inode_search(&ext2_super_block1, blck_length, EXT2_ROOT_INO, way, 1);
 	if (inode_number < 0)
 	{
 		return inode_number;
@@ -267,7 +262,7 @@ static int in_read(struct ext2_super_block* ext2_super_block1, long int blck_len
 	{
 		return offset2;																									
 	}
-		if(pread(ext2img, (char*)&ext2_inode1, sizeof(struct ext2_inode), offset2) != sizeof(struct ext2_inode))					
+		if(pread(img_file, (char*)&ext2_inode1, sizeof(struct ext2_inode), offset2) != sizeof(struct ext2_inode))					
 		{
 			return -errno;
 		}
@@ -292,7 +287,7 @@ static int in_read(struct ext2_super_block* ext2_super_block1, long int blck_len
 		if (sbn < EXT2_IND_BLOCK)
 		{
 			
-			if(pread(ext2img, buf, readportion, blck_length*inode.i_block[sbn]) != (int)readportion)
+			if(pread(img_file, buf, readportion, blck_length*inode.i_block[sbn]) != (int)readportion)
 			{
 				return -errno;
 			}
@@ -300,11 +295,11 @@ static int in_read(struct ext2_super_block* ext2_super_block1, long int blck_len
 		else if (sbn < EXT2_IND_BLOCK + blck_length/4)
 		{
 			int mempage = 0;
-			if (pread(ext2img, (char*) &mempage, 4, blck_length*inode.i_block[EXT2_IND_BLOCK] + (sbn - EXT2_IND_BLOCK)*4) != 4)
+			if (pread(img_file, (char*) &mempage, 4, blck_length*inode.i_block[EXT2_IND_BLOCK] + (sbn - EXT2_IND_BLOCK)*4) != 4)
 			{
 				return -errno;
 			}
-			if(pread(ext2img, buf, readportion, blck_length*mempage) != (int)readportion)
+			if(pread(img_file, buf, readportion, blck_length*mempage) != (int)readportion)
 			{
 				return -errno;
 				
@@ -314,17 +309,17 @@ static int in_read(struct ext2_super_block* ext2_super_block1, long int blck_len
 			int curr_val = sbn - (EXT2_IND_BLOCK + blck_length/4);
 			int count = curr_val / (blck_length/4);
 			int memory_part = 0;
-			if (pread(ext2img, (char*) &memory_part, 4, blck_length*inode.i_block[EXT2_IND_BLOCK+1] + count*4) != 4)
+			if (pread(img_file, (char*) &memory_part, 4, blck_length*inode.i_block[EXT2_IND_BLOCK+1] + count*4) != 4)
 			{
 				return -errno;
 			}
 				curr_val = curr_val % (blck_length/4);
 			int mem = 0;
-			if (pread(ext2img, (char*) &mem, 4, blck_length*memory_part + curr_val*4) != 4)
+			if (pread(img_file, (char*) &mem, 4, blck_length*memory_part + curr_val*4) != 4)
 			{
 				return -errno;
 			}
-			if(pread(ext2img, buf, readportion, blck_length*mem) != (int)readportion)
+			if(pread(img_file, buf, readportion, blck_length*mem) != (int)readportion)
 			{
 				return -errno;
 			}
@@ -350,7 +345,7 @@ static int read_hello(const char *way, char *buf, size_t size, off_t off, struct
 		return remover;
 	}
 
-	int inode_number = Find_ino(&ext2_super_block1, blck_length, EXT2_ROOT_INO, way, 0);
+	int inode_number = inode_search(&ext2_super_block1, blck_length, EXT2_ROOT_INO, way, 0);
 	if (inode_number < 0)
 		return inode_number;
 
@@ -371,7 +366,7 @@ static int open_hello(const char *way, struct fuse_file_info *fuse_file_info1)
 		return remover;
 	}
 
-	int inode_number = Find_ino(&ext2_super_block1, blck_length, EXT2_ROOT_INO, way, 0);
+	int inode_number = inode_search(&ext2_super_block1, blck_length, EXT2_ROOT_INO, way, 0);
 	if (inode_number < 0)
 		return inode_number;
 
@@ -412,14 +407,14 @@ static int getattr_hello(const char *way, struct stat *st, struct fuse_file_info
 	}
 
 	int inf = 0;
-	int ind = Find_ino(&ext2_super_block1, blck_length, EXT2_ROOT_INO, way, 1);
+	int ind = inode_search(&ext2_super_block1, blck_length, EXT2_ROOT_INO, way, 1);
 
     memset(st, 0, sizeof(struct stat));
 	if (ind > 0) {
 		st->st_mode = S_IFDIR | 0400;
 		st->st_nlink = 2;
 		st -> st_ino = ind;
-	} else if ((inf = Find_ino(&ext2_super_block1, blck_length, EXT2_ROOT_INO, way, 0)) > 0) {
+	} else if ((inf = inode_search(&ext2_super_block1, blck_length, EXT2_ROOT_INO, way, 0)) > 0) {
 		st->st_mode = S_IFREG | 0400;
 		st->st_nlink = 1;
 
@@ -427,7 +422,7 @@ static int getattr_hello(const char *way, struct stat *st, struct fuse_file_info
 		int offset = make_in_off(&ext2_super_block1, blck_length, inf);														
 		if(offset < 0)																										
 			return offset;																									
-		if(pread(ext2img, (char*)&inode, sizeof(struct ext2_inode), offset) != sizeof(struct ext2_inode))					
+		if(pread(img_file, (char*)&inode, sizeof(struct ext2_inode), offset) != sizeof(struct ext2_inode))					
 			return -errno;
 
 		st->st_size = ((long long)inode.i_size_high << 32L) + (long long)inode.i_size;
@@ -628,7 +623,7 @@ int helloworld(const char *mntp)
 */
 int ext2fuse(int img, const char *mntp)
 {
-	ext2img = img;
+	img_file = img;
 
 	char *argv[] = {"exercise", "-f", (char *)mntp, NULL};
 	return fuse_main(3, argv, &ext2_ops, NULL);
