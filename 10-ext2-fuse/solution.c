@@ -79,8 +79,8 @@ static int dir_reader(long int blck_length, int highest_val, uint32_t* structs, 
 			size_remember -= dir_entry -> rec_len;
 			
 			int chk1 = !strncmp(dir_entry -> name, left_way, dir_entry -> name_len);
-			bool chk2 = (dir_entry -> name_len == len_en);
-			if(chk1 && chk2)
+		
+			if(chk1 && (dir_entry -> name_len == len_en))
 			{
 				if(dir_entry -> file_type != type_en)
 				{
@@ -350,7 +350,7 @@ static int in_read(struct ext2_super_block* ext2_super_block1, long int blck_len
 				curr_val = curr_val % (blck_length/4);
 			int mem = 0;
 			int check4 = pread(img_file, (char*) &mem, 4, blck_length*memory_part + curr_val*4);
-			if ( != 4)
+			if (check4 != 4)
 			{
 				return -errno;
 			}
