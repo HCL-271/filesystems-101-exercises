@@ -99,7 +99,7 @@ static int dir_reader(long int blck_length, int highest_val, uint32_t* structs, 
 	}\
 	uint32_t Fist_part[blck_length/4];\
 	uint32_t second[blck_length/4];\
-	int final = func(blck_length, EXT2_IND_BLOCK, ext2_inode.i_block, args);\
+	int final = func(blck_length, EXT2_IND_BLOCK, ext2_inode1.i_block, args);\
 	shander_c;\
 	inside_00;	\
 	if(pread(img_file, (char*)Fist_part, blck_length, blck_length * ext2_inode.i_block[EXT2_IND_BLOCK]) != blck_length)\
@@ -116,7 +116,7 @@ static int dir_reader(long int blck_length, int highest_val, uint32_t* structs, 
 	for (int j = 0; j < blck_length/4; ++j)\
 {\
 		if(pread(img_file, (char*)Fist_part, blck_length, blck_length * second[j]) != blck_length)\
-		{\		return -errno; \
+		{return -errno; \
 		}\
 		final = func(blck_length, blck_length/4, Fist_part, args);	\
 		shander_c;\
@@ -213,7 +213,7 @@ static int directory_reader(struct ext2_super_block* ext2_super_block1, long int
 {
 
 	NPARSE(  data_torrent, SINGLE_ARG(torrent, file1),
-			    {if(res <= 0) {return res;}},
+			    {if(final <= 0) {return final;}},
 				{if(ext2_inode1.i_block[EXT2_IND_BLOCK] == 0) {return 0;}},
 				{if(ext2_inode1.i_block[EXT2_IND_BLOCK + 1] == 0) return 0;},
 				{})
@@ -268,7 +268,7 @@ static int in_read(struct ext2_super_block* ext2_super_block1, long int blck_len
 		}
 	long long remember = ((long long)ext2_inode1.i_size_high << 32L) + (long long)ext2_inode1.i_size;
 	unsigned int sbn = offset1 / blck_length;
-	unsigned int out_side_sblck = offset1 % blck_length
+	unsigned int out_side_sblck = offset1 % blck_length;
 	if(offset1 >= remember)
 	{
 		return 0;
@@ -278,7 +278,7 @@ static int in_read(struct ext2_super_block* ext2_super_block1, long int blck_len
 		size = remember - offset1;
 	}
 	unsigned int left_part = size;
-;
+
 	
 
 	while(left_part > 0){
