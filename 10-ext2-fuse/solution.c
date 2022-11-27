@@ -102,7 +102,7 @@ static int dir_reader(long int blck_length, int highest_val, uint32_t* structs, 
 	int final = func(blck_length, EXT2_IND_BLOCK, ext2_inode1.i_block, args);\
 	shander_c;\
 	inside_00;	\
-	if(pread(img_file, (char*)Fist_part, blck_length, blck_length * ext2_inode.i_block[EXT2_IND_BLOCK]) != blck_length)\
+	if(pread(img_file, (char*)Fist_part, blck_length, blck_length * ext2_inode1.i_block[EXT2_IND_BLOCK]) != blck_length)\
 		{\
 		return -errno;\
 	}\
@@ -177,7 +177,7 @@ static int data_torrent(long int blck_length, int highest_val, uint32_t* structs
 		
 		while ((-1)*size_remember > 0)
 		{
-			if(ext2_dir_entry_21 -> ext2_inode1 == 0)
+			if(ext2_dir_entry_21 -> inode == 0)
 			{
 				size_remember -= ext2_dir_entry_21 -> rec_len;
 				ext2_dir_entry_21 = (struct ext2_dir_entry_2*) ((char*) (ext2_dir_entry_21) +  ext2_dir_entry_21 -> rec_len);
@@ -197,7 +197,7 @@ static int data_torrent(long int blck_length, int highest_val, uint32_t* structs
 			{
 			buffer1.st_mode = S_IFDIR | S_IRUSR | S_IRGRP | S_IROTH;
 			}
-			buffer1.st_ino = ext2_dir_entry_21 -> ext2_inode1;
+			buffer1.st_ino = ext2_dir_entry_21 -> inode;
 			
 			torrent(file1, block1, &buffer1, 0, 0);
 			
