@@ -109,7 +109,7 @@ static int dir_reader(long int blck_length, int highest_val, uint32_t* structs, 
 	final = func(blck_length, blck_length/4, Fist_part, args);\
 	shander_c;\
 	inside_01;\
-	if(pread(img_file, (char*)second, blck_length, blck_length * ext2_inode.i_block[EXT2_IND_BLOCK+1]) != blck_length)\
+	if(pread(img_file, (char*)second, blck_length, blck_length * ext2_inode1.i_block[EXT2_IND_BLOCK+1]) != blck_length)\
 		{\
 		return -errno;\
 	}\
