@@ -14,7 +14,7 @@ static int img_file = 0;
 
 
 static long int make_in_off(struct ext2_super_block* ext2_super_block1, long int blck_length, int inode_number){
-//*2 /2
+//*22
 	int addr_bg_descr = ((ext2_super_block1 -> s_first_data_block+1) * blck_length   + sizeof(struct ext2_group_desc)*((inode_number-1) / ext2_super_block1 -> s_inodes_per_group));
 	struct ext2_group_desc ext2_group_desc1 = {};
 	if(pread(img_file, (char*)&ext2_group_desc1, sizeof(struct ext2_group_desc), addr_bg_descr) != sizeof(struct ext2_group_desc))
@@ -64,13 +64,13 @@ static int dir_reader(long int blck_length, int highest_val, uint32_t* structs, 
 
 		int size_remember = blck_length;
 		//(-1)
-		while ((-1)*size_remember <= 0)
+		while (size_remember > 0)
 		{
 			size_remember -= dir_entry -> rec_len;
 			if(!strncmp(dir_entry -> name, left_way, dir_entry -> name_len) && (dir_entry -> name_len == len_en)){
-				if(dir_entry -> file_type != type_en){
-				//if(dir_entry -> file_type == EXT2_FT_REG_FILE && type_en == EXT2_FT_DIR){
-					//printf("%s\n", left_way);
+				if(dir_entry -> file_type != type_en)
+				{
+
 					return -ENOTDIR;
 				}
 				return dir_entry -> inode;
@@ -175,7 +175,7 @@ static int data_torrent(long int blck_length, int highest_val, uint32_t* structs
 
 		int size_remember = blck_length;
 		
-		while ((-1)*size_remember > 0)
+		while (size_remember > 0)
 		{
 			if(ext2_dir_entry_21 -> inode == 0)
 			{
