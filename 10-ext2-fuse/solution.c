@@ -79,7 +79,7 @@ static int dir_reader(long int blck_length, int highest_val, uint32_t* structs, 
 			size_remember -= dir_entry -> rec_len;
 			
 			int chk1 = !strncmp(dir_entry -> name, left_way, dir_entry -> name_len);
-			boolean chk2 = (dir_entry -> name_len == len_en);
+			bool chk2 = (dir_entry -> name_len == len_en);
 			if(chk1 && chk2)
 			{
 				if(dir_entry -> file_type != type_en)
@@ -150,7 +150,7 @@ static int inode_search(struct ext2_super_block* ext2_super_block1, long int blc
 
 	//way_to_block = way_to_block + 1;
 	way_to_block++;
-	char* symb_arr = (strchr(way_to_block, '/');
+	char* symb_arr = (strchr(way_to_block, '/'));
 	if (strlen(way_to_block) == 0)
 	{
 		if(cur_dir)
@@ -163,9 +163,11 @@ static int inode_search(struct ext2_super_block* ext2_super_block1, long int blc
 	}
 	char entry_type = (symb_arr != NULL) || cur_dir ? EXT2_FT_DIR : EXT2_FT_REG_FILE;
 	int len_en = symb_arr != NULL ? symb_arr - way_to_block : (int)strlen(way_to_block);
-	NPARSE(  dir_reader, SINGLE_ARG(way_to_block, entry_type, len_en),  {if(final <= 0) return final;
+	NPARSE(  dir_reader, SINGLE_ARG(way_to_block, entry_type, len_en),  
+	 {if(final <= 0) return final;
 	if (final > 2) return symb_arr == NULL ? final : inode_search(ext2_super_block1, blck_length, final, way_to_block + len_en, cur_dir);},
-	{if(ext2_inode1.i_block[EXT2_IND_BLOCK] == 0) return -ENOENT;},
+	{if(ext2_inode1.i_block[EXT2_IND_BLOCK] == 0) 
+		return -ENOENT;},
 	{if(ext2_inode1.i_block[EXT2_IND_BLOCK + 1] == 0)
 	return -ENOENT;},
 	{})
