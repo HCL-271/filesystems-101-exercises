@@ -130,9 +130,9 @@ func (s *Server) ParallelHash(ctx context.Context, req *parhashpb.ParHashReq) (r
 			if err != nil {
 				return err
 			}
-			s.lock.Lock()
+			s.MutexSyncronizer.Lock()
 			hashes[number] = hash.Hash
-			s.lock.Unlock()
+			s.MutexSyncronizer.Unlock()
 			
 			return nil
 		})
