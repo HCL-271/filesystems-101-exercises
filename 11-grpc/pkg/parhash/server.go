@@ -130,13 +130,13 @@ func (s *Server) ParallelHash(ctx context.Context, req *parhashpb.ParHashReq) (r
 		number := i
 		workgroup1.Go(ctx, func(ctx context.Context) error {
 			s.MutexSyncronizer.Lock()
-			previous := s.checker
+			s.previous := s.checker
 			s.checker +=1
 			if s.checker >= len(s.conf.BackendAddrs) {
 				s.checker = 0
 			}
 			s.MutexSyncronizer.Unlock()
-			resp, err := clients[previous].Hash(ctx, &hashpb.HashReq{Data: req.Data[number]})
+			resp, err := clients[s.previous].Hash(ctx, &hashpb.HashReq{Data: req.Data[number]})
 			if err != nil {
 				return err
 			}
