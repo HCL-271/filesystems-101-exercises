@@ -111,8 +111,8 @@ func (s *Server) ParallelHash(ctx context.Context, req *parhashpb.ParHashReq) (r
 	
 	clients := make([]hashpb.HashSvcClient, len(s.conf.BackendAddrs))
 	joins := make([]*grpc.ClientConn, len(s.conf.BackendAddrs))
-	for i := range joins {
-		joins[i], err = grpc.Dial(s.conf.BackendAddrs[i], grpc.WithInsecure())
+	for i, addr := range s.conf.BackendAddrs {
+		joins[i], err = grpc.Dial(addr, grpc.WithInsecure())
 		if err != nil {
 			log.Fatalf("failed to connect to %q: %v", s.conf.BackendAddrs[i], err)
 		}
