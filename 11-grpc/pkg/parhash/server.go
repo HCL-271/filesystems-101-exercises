@@ -117,7 +117,7 @@ func (s *Server) ParallelHash(ctx context.Context, req *parhashpb.ParHashReq) (r
 	for i, addr := range s.conf.BackendAddrs {
 		joins[i], err = grpc.Dial(addr, grpc.WithInsecure())
 		if err != nil {
-			log.Fatalf("failed to hash data: %v", err)
+			return nil, err
 		}
 		defer joins[i].Close()
 		clients[i] = hashpb.NewHashSvcClient(joins[i])
@@ -130,13 +130,13 @@ func (s *Server) ParallelHash(ctx context.Context, req *parhashpb.ParHashReq) (r
 		number := i
 		workgroup1.Go(ctx, func(ctx context.Context) error {
 			s.MutexSyncronizer.Lock()
-			s.previous := s.checker
+			previous := s.checker
 			s.checker +=1
 			if s.checker >= len(s.conf.BackendAddrs) {
 				s.checker = 0
 			}
 			s.MutexSyncronizer.Unlock()
-			resp, err := clients[s.previous].Hash(ctx, &hashpb.HashReq{Data: req.Data[number]})
+			resp, err := clients[previous].Hash(ctx, &hashpb.HashReq{Data: req.Data[number]})
 			if err != nil {
 				return err
 			}
@@ -147,7 +147,7 @@ func (s *Server) ParallelHash(ctx context.Context, req *parhashpb.ParHashReq) (r
 		})
 	}
 	if err := workgroup1.Wait(); err != nil {
-		log.Fatalf("failed to hash data: %v", err)
+		return nil, err
 	}
 	return &parhashpb.ParHashResp{Hashes: hashes}, nil
 }
