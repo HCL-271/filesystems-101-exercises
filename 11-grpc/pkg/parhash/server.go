@@ -48,7 +48,7 @@ type Server struct {
 	conf Config
 	MutexSyncronizer sync.Mutex
 	checker int
-	previous int
+
 
 	stop context.CancelFunc
 	l    net.Listener
@@ -63,41 +63,33 @@ func New(conf Config) *Server {
 		conf: conf,
 		sem:  semaphore.NewWeighted(int64(conf.Concurrency)),
 		checker: 0,
-		previous: 0,
+
 	}
 }
 
 func (s *Server) Start(ctx context.Context) (err error) {
-	defer func() { err = errors.Wrapf(err, "Start()") }()
+	defer func() { err = errors.Wrap(err, "Start()") }()
 
 	ctx, s.stop = context.WithCancel(ctx)
-
 	s.l, err = net.Listen("tcp", s.conf.ListenAddr)
 	if err != nil {
 		return err
 	}
-
 	srv := grpc.NewServer()
 	parhashpb.RegisterParallelHashSvcServer(srv, s)
-	//change method to parallel hash
 
 	s.wg.Add(2)
 	go func() {
 		defer s.wg.Done()
-
 		srv.Serve(s.l)
 	}()
 	go func() {
 		defer s.wg.Done()
-
 		<-ctx.Done()
 		s.l.Close()
 	}()
-
 	return nil
-	
 }
-
 func (s *Server) ListenAddr() string {
 	return s.l.Addr().String()
 }
@@ -111,8 +103,8 @@ func (s *Server) ParallelHash(ctx context.Context, req *parhashpb.ParHashReq) (r
 
 	clients := make([]hashpb.HashSvcClient, len(s.conf.BackendAddrs))
 	joins  := make([]*grpc.ClientConn, len(s.conf.BackendAddrs))
-	for i, addr := range s.conf.BackendAddrs {
-		joins[i], err := grpc.Dial(addr, grpc.WithInsecure())
+	for i := range joins {
+		joins[i], err := grpc.Dial(s.conf.BackendAddrs[i], grpc.WithInsecure())
 		if err != nil
 		{
 			return nil, err
@@ -120,12 +112,14 @@ func (s *Server) ParallelHash(ctx context.Context, req *parhashpb.ParHashReq) (r
 		defer joins[i].Close()
 		clients[i] = hashpb.NewHashSvcClient(joins[i])
 	}
-	var (workgroup1     = workgroup.New(workgroup.Config{Sem: s.sem})
-		hashes = make([][]byte, len(req.Data)))
+	var (
+		workgroup1     = workgroup.New(workgroup.Config{Sem: s.sem})
+		hashes = make([][]byte, len(req.Data))
+	)
 
 	for i := range req.Data {
 		number := i
-		wg.Go(ctx, func(ctx context.Context) error {
+		workgroup1.Go(ctx, func(ctx context.Context) error {
 			s.MutexSyncronizer.Lock()
 			previous = s.checker
 			
