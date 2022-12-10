@@ -125,7 +125,7 @@ func (s *Server) ParallelHash(ctx context.Context, req *parhashpb.ParHashReq) (r
 
 	for i := range req.Data {
 		number := i
-		wg.Go(ctx, func(ctx context.Context) error {
+		workgroup1.Go(ctx, func(ctx context.Context) error {
 			s.MutexSyncronizer.Lock()
 			previous = s.checker
 			
@@ -136,9 +136,9 @@ func (s *Server) ParallelHash(ctx context.Context, req *parhashpb.ParHashReq) (r
 			if err != nil {
 				return err
 			}
-			s.lock.Lock()
+			s.MutexSyncronizer.Lock()
 			hashes[number] = hash.Hash
-			s.lock.Unlock()
+			s.MutexSyncronizer.Unlock()
 			
 			return nil
 		})
