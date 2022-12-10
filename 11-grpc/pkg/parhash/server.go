@@ -5,7 +5,7 @@ import (
 
 	"net"
 	"sync"
-
+	"log"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 
@@ -59,10 +59,11 @@ type Server struct {
 
 func New(conf Config) *Server {
 	return &Server{
-		checker: 0,
-		previous: 0,
+		
 		conf: conf,
 		sem:  semaphore.NewWeighted(int64(conf.Concurrency)),
+		checker: 0,
+		previous: 0,
 	}
 }
 
@@ -116,6 +117,7 @@ func (s *Server) ParallelHash(ctx context.Context, req *parhashpb.ParHashReq) (r
 		{
 			return nil, err
 		}
+		defer joins[i].Close()
 		clients[i] = hashpb.NewHashSvcClient(joins[i])
 	}
 	var (workgroup1     = workgroup.New(workgroup.Config{Sem: s.sem})
@@ -125,12 +127,12 @@ func (s *Server) ParallelHash(ctx context.Context, req *parhashpb.ParHashReq) (r
 		number := i
 		wg.Go(ctx, func(ctx context.Context) error {
 			s.MutexSyncronizer.Lock()
-			s.previous = s.checker
+			previous = s.checker
 			
 			index := s.checker % len(clients)
 			s.checker++
 			s.MutexSyncronizer.Unlock()
-			hash, err := clients[s.previous].Hash(ctx, &hashpb.HashReq{Data: req.Data[number]})
+			hash, err := clients[previous].Hash(ctx, &hashpb.HashReq{Data: req.Data[number]})
 			if err != nil {
 				return err
 			}
