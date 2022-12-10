@@ -100,48 +100,42 @@ func (s *Server) Stop() {
 }
 
 func (s *Server) ParallelHash(ctx context.Context, req *parhashpb.ParHashReq) (resp *parhashpb.ParHashResp, err error) {
-
+	connections := make([]*grpc.ClientConn, len(s.conf.BackendAddrs))
 	clients := make([]hashpb.HashSvcClient, len(s.conf.BackendAddrs))
-	joins  := make([]*grpc.ClientConn, len(s.conf.BackendAddrs))
-	for i := range joins {
-		joins[i], err := grpc.Dial(s.conf.BackendAddrs[i], grpc.WithInsecure())
-		if err != nil
-		{
-			return nil, err
+	for i := range connections {
+		connections[i], err = grpc.Dial(s.conf.BackendAddrs[i], grpc.WithInsecure())
+		if err != nil {
+			log.Fatalf("failed to connect to %q: %v", s.conf.BackendAddrs[i], err)
 		}
-		defer joins[i].Close()
-		clients[i] = hashpb.NewHashSvcClient(joins[i])
+		defer connections[i].Close()
+		clients[i] = hashpb.NewHashSvcClient(connections[i])
 	}
 	var (
-		workgroup1     = workgroup.New(workgroup.Config{Sem: s.sem})
+		wg     = workgroup.New(workgroup.Config{Sem: s.sem})
 		hashes = make([][]byte, len(req.Data))
 	)
-
 	for i := range req.Data {
-		number := i
-		workgroup1.Go(ctx, func(ctx context.Context) error {
-			s.MutexSyncronizer.Lock()
-			previous = s.checker
-			
-			index := s.checker % len(clients)
-			s.checker++
-			s.MutexSyncronizer.Unlock()
-			hash, err := clients[previous].Hash(ctx, &hashpb.HashReq{Data: req.Data[number]})
+		query_nr := i
+		wg.Go(ctx, func(ctx context.Context) error {
+			s.lock.Lock()
+			backend_nr := s.current
+			s.current += 1
+			if s.current >= len(s.conf.BackendAddrs) {
+				s.current = 0
+			}
+			s.lock.Unlock()
+			resp, err := clients[backend_nr].Hash(ctx, &hashpb.HashReq{Data: req.Data[query_nr]})
 			if err != nil {
 				return err
 			}
-			s.MutexSyncronizer.Lock()
-			hashes[number] = hash.Hash
-			s.MutexSyncronizer.Unlock()
-			
+			s.lock.Lock()
+			hashes[query_nr] = resp.Hash
+			s.lock.Unlock()
 			return nil
 		})
 	}
-	
-	if err := workgroup1.Wait(); err != nil {
-		return nil, err
+	if err := wg.Wait(); err != nil {
+		log.Fatalf("failed to hash data: %v", err)
 	}
-	
-	
-		return &parhashpb.ParHashResp{Hashes: hashes}, nil
+	return &parhashpb.ParHashResp{Hashes: hashes}, nil
 }
