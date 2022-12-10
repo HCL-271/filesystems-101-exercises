@@ -2,18 +2,17 @@ package parhash
 
 import (
 	"context"
-
+	"log"
 	"net"
 	"sync"
-	"log"
+
 	"github.com/pkg/errors"
+	"golang.org/x/sync/semaphore"
 	"google.golang.org/grpc"
 
 	hashpb "fs101ex/pkg/gen/hashsvc"
 	parhashpb "fs101ex/pkg/gen/parhashsvc"
-	"golang.org/x/sync/semaphore"
 	"fs101ex/pkg/workgroup"
-	//zero iq copy from hash variant
 )
 
 type Config struct {
@@ -46,24 +45,21 @@ type Config struct {
 // and evenly distributes the load across backends.
 type Server struct {
 	conf Config
-	MutexSyncronizer sync.Mutex
-	checker int
 
+	sem     *semaphore.Weighted
+	lock    sync.Mutex
+	current int
 
 	stop context.CancelFunc
 	l    net.Listener
 	wg   sync.WaitGroup
-	
-	sem *semaphore.Weighted
 }
 
 func New(conf Config) *Server {
 	return &Server{
-		
-		conf: conf,
-		sem:  semaphore.NewWeighted(int64(conf.Concurrency)),
-		checker: 0,
-
+		conf:    conf,
+		sem:     semaphore.NewWeighted(int64(conf.Concurrency)),
+		current: 0,
 	}
 }
 
@@ -90,6 +86,7 @@ func (s *Server) Start(ctx context.Context) (err error) {
 	}()
 	return nil
 }
+
 func (s *Server) ListenAddr() string {
 	return s.l.Addr().String()
 }
