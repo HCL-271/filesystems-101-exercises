@@ -2,7 +2,7 @@ package parhash
 
 import (
 	"context"
-	"crypto/sha256"
+
 	"net"
 	"sync"
 
