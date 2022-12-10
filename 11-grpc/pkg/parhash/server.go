@@ -48,6 +48,7 @@ type Server struct {
 	conf Config
 	MutexSyncronizer sync.Mutex
 	checker int
+	previous int
 	
 
 	stop context.CancelFunc
@@ -63,6 +64,7 @@ func New(conf Config) *Server {
 		conf: conf,
 		sem:  semaphore.NewWeighted(int64(conf.Concurrency)),
 		checker: 0,
+		previous: 0,
 		
 		
 	}
