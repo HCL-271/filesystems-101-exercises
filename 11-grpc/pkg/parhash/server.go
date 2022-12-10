@@ -117,7 +117,7 @@ func (s *Server) ParallelHash(ctx context.Context, req *parhashpb.ParHashReq) (r
 	for i, addr := range s.conf.BackendAddrs {
 		joins[i], err = grpc.Dial(addr, grpc.WithInsecure())
 		if err != nil {
-			return nil, err
+			log.Fatalf("failed to hash data: %v", err)
 		}
 		defer joins[i].Close()
 		clients[i] = hashpb.NewHashSvcClient(joins[i])
@@ -147,7 +147,7 @@ func (s *Server) ParallelHash(ctx context.Context, req *parhashpb.ParHashReq) (r
 		})
 	}
 	if err := workgroup1.Wait(); err != nil {
-		return nil, err
+		log.Fatalf("failed to hash data: %v", err)
 	}
 	return &parhashpb.ParHashResp{Hashes: hashes}, nil
 }
