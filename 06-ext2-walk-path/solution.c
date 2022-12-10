@@ -1,3 +1,4 @@
+
 #include <ext2fs/ext2fs.h>
 #include "solution.h"
 #include <sys/types.h>
@@ -324,9 +325,5 @@ int dump_file(int img, const char* way_const, int returner)
     return errno;
   }
 
- free(data_container);
-  cler_i(s3);
-  cler_i(s1);
-  cler_i(s2);
-  return 0;
-}
+
+

@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -304,4 +305,3 @@ btree merge(btree b1, btree b2)
         B_tree_insert(out, data[i]);
     }
     return out;
-}

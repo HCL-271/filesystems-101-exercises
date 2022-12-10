@@ -1,3 +1,4 @@
+
 #include "solution.h"
 #include <stdlib.h>
 #include <limits.h>
@@ -410,3 +411,4 @@ int dump_file(int img, const char* way_const, int returner)
   cler_i(s2);
   return 0;
 }*/
+

@@ -1,3 +1,4 @@
+
 #include "solution.h"
 
 #include <errno.h>
@@ -670,6 +671,7 @@ int helloworld(const char *mntp)
 int ext2fuse(int img, const char *mntp)
 {
 	img_file = img;
+
 
 	char *argv[] = {"exercise", "-f", (char *)mntp, NULL};
 	return fuse_main(3, argv, &ext2_ops, NULL);

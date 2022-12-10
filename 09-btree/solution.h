@@ -26,6 +26,7 @@ bool btree_contains(struct btree *t, int x);
    Implement iteration over all values contained in a B-tree.
    Iterating over a B-tree must return all values in it, sorted
    from smallest to largest.
+
    Iterators will not be used concurrently with btree_insert()
    and btree_remove().
  */
