@@ -180,7 +180,7 @@ func (s *Server) ParallelHash(ctx context.Context, req *parhashpb.ParHashReq) (r
 	for i, addr := range s.conf.BackendAddrs {	
 		joins[i], err = grpc.Dial(s.conf.BackendAddrs[i], grpc.WithInsecure())
 		if err != nil {
-			return nil, err
+			return  err
 		}
 		defer joins[i].Close()
 		clients[i] = hashpb.NewHashSvcClient(joins[i])
@@ -210,7 +210,9 @@ func (s *Server) ParallelHash(ctx context.Context, req *parhashpb.ParHashReq) (r
 			if err != nil {
 				return err
 			}
-			s.subquery_durations.WithLabelValues(s.conf.BackendAddrs[index]).Observe(tp1.Seconds())
+			diff := tp1.Seconds()
+			h :=s.conf.BackendAddrs[index]
+			s.subquery_durations.WithLabelValues(h).Observe(diff)
 			
 			s.MutexSyncronizer.Lock()
 			hashes[i] = resp.Hash
@@ -220,7 +222,7 @@ func (s *Server) ParallelHash(ctx context.Context, req *parhashpb.ParHashReq) (r
 		})
 	}
 	if err := workgroup1.Wait(); err != nil {
-		return nil, err
+		return  err
 	}
 	return &parhashpb.ParHashResp{Hashes: hashes}, nil
 
