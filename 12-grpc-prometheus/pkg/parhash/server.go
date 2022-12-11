@@ -179,7 +179,7 @@ func (s *Server) ParallelHash(ctx context.Context, req *parhashpb.ParHashReq) (r
 	for i, addr := range s.conf.BackendAddrs {	
 		joins[i], err = grpc.Dial(addr, grpc.WithInsecure())
 		if err != nil {
-			log.Fatalf("%q: %v", s.conf.BackendAddrs[i], err)
+			log.Fatalf("%q: %v", addr, err)
 		}
 		defer joins[i].Close()
 		clients[i] = hashpb.NewHashSvcClient(joins[i])
@@ -209,7 +209,7 @@ func (s *Server) ParallelHash(ctx context.Context, req *parhashpb.ParHashReq) (r
 			if err != nil {
 				return err
 			}
-			time := float64(to.Seconds())
+			time := float64(to.Microseconds())
 			s.Histvec.With(prometheus.Labels{"backend": s.conf.BackendAddrs[previous]}).Observe(time)
 			s.MutexSyncronizer.Lock()
 			hashes[number] = resp.Hash
