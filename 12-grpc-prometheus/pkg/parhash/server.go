@@ -187,20 +187,24 @@ func (s *Server) ParallelHash(ctx context.Context, req *parhashpb.ParHashReq) (r
 	}
 	var
 	(
-	wg = workgroup.New(workgroup.Config{Sem : s.sem})
+	workgroup1 = workgroup.New(workgroup.Config{Sem : s.sem})
 	 hashes = make([][]byte, len(req.Data))
 	)
-	for i, data := range req.Data {
-		i, data := i, data
-		wg.Go(ctx, func(ctx context.Context) error {
+	for i := range req.Data {
+		number := i
+		workgroup1.Go(ctx, func(ctx context.Context) error {
 			var err error
 			s.MutexSyncronizer.Lock()
 			index := s.checker
+			previous := s.checker
 			s.checker = (s.checker + 1) % len(s.conf.BackendAddrs)
+			if s.checker >= len(s.conf.BackendAddrs) {
+				s.checker = 0
+			}
 			s.MutexSyncronizer.Unlock()
 			
 			from1 := time.Now()
-			resp, err := clients[index].Hash(ctx, &hashpb.HashReq{Data: data})
+			resp, err := clients[previous].Hash(ctx, &hashpb.HashReq{Data: data})
 			tp1 := time.Since(from1)
 			
 			if err != nil {
@@ -215,7 +219,7 @@ func (s *Server) ParallelHash(ctx context.Context, req *parhashpb.ParHashReq) (r
 			return nil
 		})
 	}
-	if err := wg.Wait(); err != nil {
+	if err := workgroup1.Wait(); err != nil {
 		return nil, err
 	}
 	return &parhashpb.ParHashResp{Hashes: hashes}, nil
