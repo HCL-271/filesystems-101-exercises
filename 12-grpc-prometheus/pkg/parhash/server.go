@@ -85,7 +85,7 @@ func New(conf Config) *Server {
 	return &Server{
 		conf: conf,
 		sem:  semaphore.NewWeighted(int64(conf.Concurrency)),
-		counter: prometheus.NewCounter(prometheus.CounterOpts
+		Pcounter: prometheus.NewCounter(prometheus.CounterOpts
 					       {
 			Namespace: "parhash",
 			Name: "nr_requests",
@@ -140,8 +140,8 @@ func (s *Server) Start(ctx context.Context) (err error) {
 	
 	*/
 	
-	s.conf.Prom.MustRegister(s.counter)
-	s.conf.Prom.MustRegister(s.subquery_durations)
+	s.conf.Prom.MustRegister(s.Pcounter)
+	s.conf.Prom.MustRegister(s.Histvec)
 
 	s.wg.Add(2)
 	go func() {
@@ -172,7 +172,7 @@ func (s *Server) Stop() {
 func (s *Server) ParallelHash(ctx context.Context, req *parhashpb.ParHashReq) (resp *parhashpb.ParHashResp, err error) {
 	defer func() { err = errors.Wrapf(err, "ParallelHash()") }()
 	
-	s.checker++
+	s.Pcounter++
 	clients := make([]hashpb.HashSvcClient, len(s.conf.BackendAddrs))
 	joins := make([]*grpc.ClientConn, len(s.conf.BackendAddrs))
 	//this part is the same to previous task
