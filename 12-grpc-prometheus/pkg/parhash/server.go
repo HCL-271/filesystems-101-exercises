@@ -172,14 +172,14 @@ func (s *Server) Stop() {
 func (s *Server) ParallelHash(ctx context.Context, req *parhashpb.ParHashReq) (resp *parhashpb.ParHashResp, err error) {
 	defer func() { err = errors.Wrapf(err, "ParallelHash()") }()
 	
-	s.Pcounter++
+	s.Pcounter.Inc()
 	clients := make([]hashpb.HashSvcClient, len(s.conf.BackendAddrs))
 	joins := make([]*grpc.ClientConn, len(s.conf.BackendAddrs))
 	//this part is the same to previous task
 	for i, addr := range s.conf.BackendAddrs {	
 		joins[i], err = grpc.Dial(addr, grpc.WithInsecure())
 		if err != nil {
-			return nil, err
+			log.Fatalf("%q: %v", s.conf.BackendAddrs[i], err)
 		}
 		defer joins[i].Close()
 		clients[i] = hashpb.NewHashSvcClient(joins[i])
@@ -223,7 +223,7 @@ func (s *Server) ParallelHash(ctx context.Context, req *parhashpb.ParHashReq) (r
 	
 	
 	if err := workgroup1.Wait(); err != nil {
-		log.Fatalf("", err)
+		log.Fatalf("%v", err)
 	}
 	return &parhashpb.ParHashResp{Hashes: hashes}, nil
 
