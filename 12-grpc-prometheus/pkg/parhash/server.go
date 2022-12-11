@@ -71,8 +71,8 @@ type Server struct {
 	checker int
 	previous int
 	
-	Pcounter prometheus.Counter 
-	Histvec *prometheus.HistogramVec
+	nr_nr_requests prometheus.Counter 
+	subquery_durations *prometheus.HistogramVec
 
 	stop context.CancelFunc
 	l    net.Listener
@@ -85,7 +85,7 @@ func New(conf Config) *Server {
 	return &Server{
 		conf: conf,
 		sem:  semaphore.NewWeighted(int64(conf.Concurrency)),
-		Pcounter: prometheus.NewCounter(prometheus.CounterOpts
+		nr_nr_requests: prometheus.NewCounter(prometheus.CounterOpts
 					       {
 			Namespace: "parhash",
 			Name: "nr_requests",
@@ -116,13 +116,13 @@ func (s *Server) Start(ctx context.Context) (err error) {
 	srv := grpc.NewServer()
 	parhashpb.RegisterParallelHashSvcServer(srv, s)
 	/* We can initialize new here as:
-	s.Pcounter = prometheus.NewCounter(prometheus.CounterOpts{
+	s.nr_nr_requests = prometheus.NewCounter(prometheus.CounterOpts{
 			Namespace: "parhash",
 			Name: "nr_requests",
 			Help: "Number of requests",
 	})
 	
-	s.Histvec = prometheus.NewHistogramVec(prometheus.HistogramOpts{
+	s.subquery_durations = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 			Namespace: "parhash",
 			Name: "subquery_durations",
 			Help: "Subquery durations",
@@ -140,8 +140,8 @@ func (s *Server) Start(ctx context.Context) (err error) {
 	
 	*/
 	
-	s.conf.Prom.MustRegister(s.Pcounter)
-	s.conf.Prom.MustRegister(s.Histvec)
+	s.conf.Prom.MustRegister(s.nr_nr_requests)
+	s.conf.Prom.MustRegister(s.subquery_durations)
 
 	s.wg.Add(2)
 	go func() {
@@ -170,61 +170,48 @@ func (s *Server) Stop() {
 }
 // let's take that code from 11-grpc task
 func (s *Server) ParallelHash(ctx context.Context, req *parhashpb.ParHashReq) (resp *parhashpb.ParHashResp, err error) {
-	defer func() { err = errors.Wrapf(err, "ParallelHash()") }()
+	s.nr_nr_requests.Inc()
 	
-	s.Pcounter.Inc()
 	clients := make([]hashpb.HashSvcClient, len(s.conf.BackendAddrs))
 	joins := make([]*grpc.ClientConn, len(s.conf.BackendAddrs))
-	//this part is the same to previous task
-	for i, addr := range s.conf.BackendAddrs {	
-		joins[i], err = grpc.Dial(addr, grpc.WithInsecure())
+	for i := range joins {
+		joins[i], err = grpc.Dial(s.conf.BackendAddrs[i], grpc.WithInsecure())
 		if err != nil {
-			log.Fatalf("%q: %v", addr, err)
+			log.Fatalf("%q: %v", s.conf.BackendAddrs[i], err)
 		}
 		defer joins[i].Close()
 		clients[i] = hashpb.NewHashSvcClient(joins[i])
 	}
-	
-
 	var (
-		workgroup1     = workgroup.New(workgroup.Config{Sem: s.sem})
+		wg     = workgroup.New(workgroup.Config{Sem: s.sem})
 		hashes = make([][]byte, len(req.Data))
 	)
-	
 	for i := range req.Data {
 		number := i
-		workgroup1.Go(ctx, func(ctx context.Context) error {
-			from0 = time.Now()
-			s.MutexSyncronizer.Lock()
+		wg.Go(ctx, func(ctx context.Context) error {
+			s.previous.Lock()
 			previous := s.checker
-			s.checker ++
+			s.checker += 1
 			if s.checker >= len(s.conf.BackendAddrs) {
 				s.checker = 0
 			}
-			s.MutexSyncronizer.Unlock()
-			to0 = time.Since(from0)
+			s.previous.Unlock()
+
 			from := time.Now()
 			resp, err := clients[previous].Hash(ctx, &hashpb.HashReq{Data: req.Data[number]})
-			to = time.Since(from)
+			to := time.Since(from)
 			if err != nil {
 				return err
 			}
-			time := float64(to.Microseconds())
-			s.Histvec.With(prometheus.Labels{"backend": s.conf.BackendAddrs[previous]}).Observe(time)
-			s.MutexSyncronizer.Lock()
+			s.subquery_durations.With(prometheus.Labels{"backend": s.conf.BackendAddrs[previous]}).Observe(float64(to.Microseconds()) / 1000)
+			s.previous.Lock()
 			hashes[number] = resp.Hash
-			s.MutexSyncronizer.Unlock()
+			s.previous.Unlock()
 			return nil
 		})
 	}
-
-	
-	
-	
-	
-	if err := workgroup1.Wait(); err != nil {
-		log.Fatalf("%v", err)
+	if err := wg.Wait(); err != nil {
+		log.Fatalf("failed to hash data: %v", err)
 	}
 	return &parhashpb.ParHashResp{Hashes: hashes}, nil
-
 }
