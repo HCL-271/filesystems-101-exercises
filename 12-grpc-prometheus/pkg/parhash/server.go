@@ -170,48 +170,49 @@ func (s *Server) Stop() {
 }
 // let's take that code from 11-grpc task
 func (s *Server) ParallelHash(ctx context.Context, req *parhashpb.ParHashReq) (resp *parhashpb.ParHashResp, err error) {
-	s.nr_nr_requests.Inc()
+	defer func() { err = errors.Wrapf(err, "ParallelHash()") }()
 	
+	s.nr_nr_requests.Inc()
 	clients := make([]hashpb.HashSvcClient, len(s.conf.BackendAddrs))
 	joins := make([]*grpc.ClientConn, len(s.conf.BackendAddrs))
-	for i := range joins {
-		joins[i], err = grpc.Dial(s.conf.BackendAddrs[i], grpc.WithInsecure())
+	for i, addr := range s.conf.BackendAddrs {	
+		joins[i], err = grpc.Dial(addr, grpc.WithInsecure())
 		if err != nil {
-			log.Fatalf("%q: %v", s.conf.BackendAddrs[i], err)
+			return nil, err
 		}
 		defer joins[i].Close()
 		clients[i] = hashpb.NewHashSvcClient(joins[i])
 	}
-	var (
-		wg     = workgroup.New(workgroup.Config{Sem: s.sem})
-		hashes = make([][]byte, len(req.Data))
-	)
-	for i := range req.Data {
-		number := i
+	var wg = workgroup.New(workgroup.Config{Sem : s.sem})
+	var hashes = make([][]byte, len(req.Data))
+	for i, data := range req.Data {
+		i, data := i, data
 		wg.Go(ctx, func(ctx context.Context) error {
-			s.previous.Lock()
-			previous := s.checker
-			s.checker += 1
-			if s.checker >= len(s.conf.BackendAddrs) {
-				s.checker = 0
-			}
-			s.previous.Unlock()
-
-			from := time.Now()
-			resp, err := clients[previous].Hash(ctx, &hashpb.HashReq{Data: req.Data[number]})
-			to := time.Since(from)
+			var err error
+			s.MutexSyncronizer.Lock()
+			index := s.checker
+			s.checker = (s.checker + 1) % len(s.conf.BackendAddrs)
+			s.MutexSyncronizer.Unlock()
+			
+			from1 := time.Now()
+			resp, err := clients[index].Hash(ctx, &hashpb.HashReq{Data: data})
+			tp1 := time.Since(from1)
+			
 			if err != nil {
 				return err
 			}
-			s.subquery_durations.With(prometheus.Labels{"backend": s.conf.BackendAddrs[previous]}).Observe(float64(to.Microseconds()) / 1000)
-			s.previous.Lock()
-			hashes[number] = resp.Hash
-			s.previous.Unlock()
+			s.subquery_durations.WithLabelValues(s.conf.BackendAddrs[index]).Observe(tp1.Seconds())
+			
+			s.MutexSyncronizer.Lock()
+			hashes[i] = resp.Hash
+			s.MutexSyncronizer.Unlock()
+
 			return nil
 		})
 	}
 	if err := wg.Wait(); err != nil {
-		log.Fatalf("failed to hash data: %v", err)
+		return nil, err
 	}
 	return &parhashpb.ParHashResp{Hashes: hashes}, nil
+
 }
